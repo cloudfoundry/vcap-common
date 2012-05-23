@@ -1,0 +1,8 @@
+Code-Review+1: Figo Feng <ffeng@vmware.com>
+Verified+1: Figo Feng <ffeng@vmware.com>
+Code-Review+2: Jesse Zhang <jessezhang@vmware.com>
+Submitted-by: Felix Hu <hhu@vmware.com>
+Submitted-at: Wed, 23 May 2012 03:15:01 +0000
+Reviewed-on: http://reviews.cloudfoundry.org/5738
+Project: vcap-common
+Branch: refs/heads/services-r12
