@@ -13,6 +13,7 @@ require "vcap/process_utils"
 require "vcap/config"
 require "vcap/priority_queue"
 require 'vcap/quota'
+require 'vcap/sorted_set_utils'
 require 'services/api/clients/service_gateway_client'
 require 'services/api/async_requests'
 require 'benchmark'
