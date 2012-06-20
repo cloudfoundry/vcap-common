@@ -30,6 +30,7 @@ module VCAP
         optional :acls
         optional :active
         optional :timeout,     Integer
+        optional :provider,    String
       end
 
       class BrokeredServiceOfferingRequest < JsonMessage
