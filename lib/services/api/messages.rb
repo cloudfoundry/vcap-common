@@ -17,20 +17,21 @@ module VCAP
       # NB: Deleting an offering takes all args in the url
       #
       class ServiceOfferingRequest < JsonMessage
-        required :label,       SERVICE_LABEL_REGEX
-        required :url,         URI::regexp(%w(http https))
+        required :label,        SERVICE_LABEL_REGEX
+        required :url,          URI::regexp(%w(http https))
 
-        optional :description, String
-        optional :info_url,    URI::regexp(%w(http https))
-        optional :tags,        [String]
-        optional :plans,       [String]
+        optional :description,  String
+        optional :info_url,     URI::regexp(%w(http https))
+        optional :tags,         [String]
+        optional :plans,        [String]
         optional :cf_plan_id
         optional :plan_options
         optional :binding_options
         optional :acls
         optional :active
-        optional :timeout,     Integer
-        optional :provider,    String
+        optional :timeout,      Integer
+        optional :provider,     String
+        optional :default_plan, String
       end
 
       class BrokeredServiceOfferingRequest < JsonMessage
