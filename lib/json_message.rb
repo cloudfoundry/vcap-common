@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2011 VMware, Inc.
+# Copyright (c) 2009-2011 VMware, Inc
 require 'rubygems'
 
 require 'yajl'
@@ -6,8 +6,13 @@ require 'yajl'
 require 'json_schema'
 
 class JsonMessage
-  # Base error class that all other JsonMessage related errors should inherit from
+  # Base error class that all other JsonMessage related errors should
+  # inherit from
   class Error < StandardError
+  end
+
+  # Fields not defined properly.
+  class DefinitionError < Error
   end
 
   # Failed to parse json during +decode+
@@ -27,12 +32,23 @@ class JsonMessage
   end
 
   class Field
-    attr_reader :name, :schema, :required
+    attr_reader :name, :schema, :required, :default
 
-    def initialize(name, schema, required=true)
+    def initialize(name, schema, required = true, default = nil)
+      if required && default
+        msg = "Cannot define a default value: #{default}"
+        msg << " for the required field: #{name}."
+        raise DefinitionError.new(msg)
+      end
+
       @name = name
       @schema = schema.is_a?(JsonSchema) ? schema : JsonSchema.new(schema)
       @required = required
+      if default
+        errs = @schema.validate(default)
+        raise ValidationError.new({name => errs}) if errs
+      end
+      @default = default
     end
   end
 
@@ -58,8 +74,8 @@ class JsonMessage
 
       errs = {}
 
-      # Treat null values as if the keys aren't present. This isn't as strict as one would like,
-      # but conforms to typical use cases.
+      # Treat null values as if the keys aren't present. This isn't as strict
+      # as one would like, but conforms to typical use cases.
       dec_json.delete_if {|k, v| v == nil}
 
       # Collect errors by field
@@ -79,23 +95,24 @@ class JsonMessage
       new(dec_json)
     end
 
-    def required(field_name, schema=JsonSchema::WILDCARD)
+    def required(field_name, schema = JsonSchema::WILDCARD)
       define_field(field_name, schema, true)
     end
 
-    def optional(field_name, schema=JsonSchema::WILDCARD)
-      define_field(field_name, schema, false)
+    def optional(field_name, schema = JsonSchema::WILDCARD, default = nil)
+      define_field(field_name, schema, false, default)
     end
 
     protected
 
-    def define_field(name, schema, required)
+    def define_field(name, schema, required, default = nil)
       name = name.to_sym
 
       @fields ||= {}
-      @fields[name] = Field.new(name, schema, required)
+      @fields[name] = Field.new(name, schema, required, default)
 
       define_method name.to_sym do
+        set_default(name)
         @msg[name]
       end
 
@@ -108,13 +125,17 @@ class JsonMessage
   def initialize(fields={})
     @msg = {}
     fields.each {|k, v| set_field(k, v)}
+    set_defaults
   end
 
   def encode
     if self.class.fields
+      set_defaults
       missing_fields = {}
       self.class.fields.each do |name, field|
-        missing_fields[name] = "Missing field #{name}" unless (!field.required || @msg.has_key?(name))
+        unless (!field.required || @msg.has_key?(name))
+          missing_fields[name] = "Missing field #{name}"
+        end
       end
       raise ValidationError.new(missing_fields) unless missing_fields.empty?
     end
@@ -130,10 +151,30 @@ class JsonMessage
 
   def set_field(field, value)
     field = field.to_sym
-    raise ValidationError.new({field => "Unknown field #{field}"}) unless self.class.fields.has_key?(field)
+    unless self.class.fields && self.class.fields.has_key?(field)
+      raise ValidationError.new({field => "Unknown field #{field}"})
+    end
 
     errs = self.class.fields[field].schema.validate(value)
     raise ValidationError.new({field => errs}) if errs
     @msg[field] = value
+  end
+
+  def set_defaults
+    if self.class.fields
+      self.class.fields.each do |name, field|
+        set_default(name)
+      end
+    end
+  end
+
+  def set_default(name)
+    if !@msg.include?(name)
+      if self.class.fields
+        if self.class.fields.include?(name) && self.class.fields[name].default
+          @msg[name] = self.class.fields[name].default
+        end
+      end
+    end
   end
 end
