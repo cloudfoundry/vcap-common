@@ -63,6 +63,7 @@ module VCAP
         required :plan,  String
 
         optional :plan_option
+        optional :provider, String
       end
 
       class GatewayProvisionRequest < JsonMessage
