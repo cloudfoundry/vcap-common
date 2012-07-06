@@ -1,7 +1,7 @@
 spec = Gem::Specification.new do |s|
   s.name = 'vcap_common'
-  s.version = '1.0.13'
-  s.date = '2012-05-25'
+  s.version = '1.0.14'
+  s.date = '2012-07-05'
   s.summary = 'vcap common'
   s.homepage = "http://github.com/vmware-ac/core"
   s.description = 'common vcap classes/methods'
