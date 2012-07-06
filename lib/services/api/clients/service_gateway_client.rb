@@ -21,12 +21,12 @@ module VCAP::Services::Api
       :delete => Net::HTTP::Delete,
     }
 
-    # Public: Indicate gateway client encounter an unexpcted error,
+    # Public: Indicate gateway client encounter an unexpected error,
     # such as can't connect to gateway or can't decode response.
     #
     class UnexpectedResponse < StandardError; end
 
-    # Pubilc: Indicate an error response from gateway
+    # Public: Indicate an error response from gateway
     #
     class ErrorResponse < StandardError
       attr_reader :status, :error
@@ -115,11 +115,6 @@ module VCAP::Services::Api
 
     def import_from_url(args)
       resp = perform_request(:put, "/gateway/v1/configurations/#{args[:service_id]}/serialized/url", args[:msg])
-      Job.decode(resp)
-    end
-
-    def import_from_data(args)
-      resp = perform_request(:put, "/gateway/v1/configurations/#{args[:service_id]}/serialized/data", args[:msg])
       Job.decode(resp)
     end
 
