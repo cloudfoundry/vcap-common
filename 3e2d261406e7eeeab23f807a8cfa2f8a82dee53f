@@ -1,0 +1,10 @@
+Code-Review+2: Anfernee Gui <agui@vmware.com>
+Code-Review+1: Andrew Liu <aliu@vmware.com>
+Code-Review+1: Tang Rui <rtang@vmware.com>
+Code-Review+1: Figo Feng <ffeng@vmware.com>
+Verified+1: CI Master <cf-ci@rbcon.com>
+Submitted-by: Tang Rui <rtang@vmware.com>
+Submitted-at: Fri, 06 Jul 2012 05:41:30 +0000
+Reviewed-on: http://reviews.cloudfoundry.org/6926
+Project: vcap-common
+Branch: refs/heads/master
