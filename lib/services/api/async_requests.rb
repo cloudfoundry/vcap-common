@@ -58,4 +58,30 @@ module VCAP::Services::Api
       [msg.code, msg.body]
     end
   end
+
+  class AsyncHttpMultiPartUpload
+    class << self
+      def new(url, timeout, multipart, head={})
+        req = {
+          :head => head,
+          :body => "",
+          :multipart => multipart
+        }
+
+        if timeout
+          EM::HttpRequest.new(url, :inactivity_timeout => timeout).post req
+        else
+          EM::HttpRequest.new(url).post req
+        end
+      end
+
+      def fibered(url, timeout, multipart, head={})
+        req = new(url, timeout, multipart, head)
+        f = Fiber.current
+        req.callback { f.resume(req) }
+        req.errback {f.resume(req)}
+        Fiber.yield
+      end
+    end
+  end
 end
