@@ -43,6 +43,13 @@ module VCAP
         optional :description,  String
       end
 
+      class ServiceRegisterSdsRequest < JsonMessage
+        required :host,         String
+        required :port,         Integer
+        required :token,        String
+        required :active
+      end
+
       class HandleUpdateRequest < JsonMessage
         required :service_id, String
         required :configuration
