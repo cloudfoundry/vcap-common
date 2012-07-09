@@ -46,7 +46,7 @@ describe JsonMessage do
     it 'should assume wildcard when schema is not defined' do
       @klass.required :required
       msg = @klass.new
-      msg.required = Object.new
+      expect { msg.required = Object.new }.to_not raise_error
     end
   end
 
@@ -85,7 +85,7 @@ describe JsonMessage do
     it 'should assume wildcard when schema is not defined' do
       @klass.optional :optional
       msg = @klass.new
-      msg.optional = Object.new
+      expect { msg.optional = Object.new }.to_not raise_error
     end
   end
 
@@ -148,11 +148,17 @@ describe JsonMessage do
 
     it 'should encode fields' do
       @klass.required :required, String
-      @klass.optional :without_default, String
       @klass.optional :with_default, String, "default"
+      @klass.optional :no_default, String
+
       msg = @klass.new
       msg.required = "required"
-      expected = {"required" => "required", "with_default" => "default"}
+      msg.no_default = "defined"
+
+      expected = {"required" => "required",
+                  "with_default" => "default",
+                  "no_default" => "defined"
+                 }
       received = Yajl::Parser.parse(msg.encode)
       received.should == expected
     end
@@ -175,17 +181,17 @@ describe JsonMessage do
 
     it 'should decode json' do
       @klass.required :required, String
-      @klass.optional :optional_with_default, String, "default"
-      @klass.optional :optional_without_default, String
+      @klass.optional :with_default, String, "default"
+      @klass.optional :no_default, String
       msg = @klass.new
       encoded = Yajl::Encoder.encode({
                                        "required" => "required",
-                                       "optional_without_default" => "blah"
+                                       "no_default" => "defined",
                                      })
       decoded = @klass.decode(encoded)
       decoded.required.should == "required"
-      decoded.optional_with_default.should == "default"
-      decoded.optional_without_default.should == "blah"
+      decoded.with_default.should == "default"
+      decoded.no_default.should == "defined"
     end
   end
 
