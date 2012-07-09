@@ -53,31 +53,5 @@ describe VCAP::Services::Api::ServiceGatewayClient do
       result = client.perform_request(http_method, path)
       result.should == message
     end
-
-
-    it "should should raise error with none 200 response" do
-      client = VCAP::Services::Api::ServiceGatewayClient.new(@url, @token, @timeout)
-      EM.should_receive(:reactor_running?).any_number_of_times.and_return nil
-
-      path = "/path1"
-      resp = mock("resq")
-      resp.should_receive(:body).and_return(
-        {:code => 40400, :description=> "not found"}.to_json,
-        {:code => 50300, :description=> "internal"}.to_json,
-        {:code => 50100, :description=> "not done yet"}.to_json,
-        {:bad_response => "foo"}.to_json,
-      )
-      resp.should_receive(:code).and_return(404, 503, 500, 500)
-      resp.should_receive(:start).any_number_of_times.and_return resp
-
-      http_method = :get
-
-      Net::HTTP.should_receive(:new).with("localhost", 80).any_number_of_times.and_return resp
-
-      expect {client.perform_request(http_method, path)}.should raise_error(VCAP::Services::Api::ServiceGatewayClient::NotFoundResponse)
-      expect {client.perform_request(http_method, path)}.should raise_error(VCAP::Services::Api::ServiceGatewayClient::GatewayInternalResponse)
-      expect {client.perform_request(http_method, path)}.should raise_error(VCAP::Services::Api::ServiceGatewayClient::ErrorResponse, /not done yet/)
-      expect {client.perform_request(http_method, path)}.should raise_error(VCAP::Services::Api::ServiceGatewayClient::UnexpectedResponse)
-    end
   end
 end
