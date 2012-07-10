@@ -2,6 +2,7 @@
 require 'uri'
 
 require 'services/api/const'
+require 'membrane'
 require 'json_message'
 
 module VCAP
@@ -49,7 +50,7 @@ module VCAP
       end
 
       class ListHandlesResponse < JsonMessage
-        required :handles, [::JsonSchema::WILDCARD]
+        required :handles, [Object]
       end
 
       class ListBrokeredServicesResponse < JsonMessage
@@ -137,7 +138,7 @@ module VCAP
       end
 
       class SnapshotList < JsonMessage
-        required :snapshots,  [::JsonSchema::WILDCARD]
+        required :snapshots,  [Object]
       end
 
       class Job < JsonMessage
@@ -146,7 +147,7 @@ module VCAP
         required :start_time, String
         optional :description, String
         optional :complete_time, String
-        optional :result, ::JsonSchema::WILDCARD
+        optional :result, Object
       end
 
       class SerializedURL < JsonMessage
