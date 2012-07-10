@@ -4,7 +4,13 @@ require 'spec_helper'
 describe JsonMessage::Field do
   it 'should raise an error when a required field is defined with a default' do
     block = lambda { JsonMessage::Field.new("key", String, true, "default") }
-    expect(&block).to raise_error(JsonMessage::DefinitionError)
+    error_checker = lambda do |error|
+      error.should be_an_instance_of(JsonMessage::DefinitionError)
+      error.message.should be_an_instance_of(String)
+      error.message.size.should > 0
+    end
+
+    expect(&block).to raise_error(&error_checker)
   end
 
   expected = 'should raise a schema validation error when schema validation'
@@ -12,7 +18,13 @@ describe JsonMessage::Field do
   it expected do
     block = lambda { JsonMessage::Field.new("optional", Hash, false,
                                             "default") }
-    expect(&block).to raise_error(JsonMessage::ValidationError)
+    error_checker = lambda do |error|
+      error.should be_an_instance_of(JsonMessage::ValidationError)
+      error.message.should be_an_instance_of(String)
+      error.message.size.should > 0
+    end
+
+    expect(&block).to raise_error(&error_checker)
   end
 
   expected = 'should not raise a schema validation error when default value'
@@ -40,7 +52,13 @@ describe JsonMessage do
       @klass.required :required, String
       msg = @klass.new
       block = lambda { msg.encode }
-      expect(&block).to raise_error(JsonMessage::ValidationError)
+      error_checker = lambda do |error|
+        error.should be_an_instance_of(JsonMessage::ValidationError)
+        error.message.should be_an_instance_of(String)
+        error.message.size.should > 0
+      end
+
+      expect(&block).to raise_error(&error_checker)
     end
 
     it 'should assume wildcard when schema is not defined' do
@@ -96,7 +114,13 @@ describe JsonMessage do
 
     it 'should raise an error when undefined field is used' do
       block = lambda { @klass.new({"undefined" => "undefined"}) }
-      expect(&block).to raise_error(JsonMessage::ValidationError)
+      error_checker = lambda do |error|
+        error.should be_an_instance_of(JsonMessage::ValidationError)
+        error.message.should be_an_instance_of(String)
+        error.message.size.should > 0
+      end
+
+      expect(&block).to raise_error(&error_checker)
     end
 
     expected = 'should set default value for optional field which is'
@@ -139,11 +163,18 @@ describe JsonMessage do
       msg.encode.should == Yajl::Encoder.encode({"optional" => "default"})
     end
 
-    it 'should raise an error when required field is missing' do
-      @klass.required :required, String
+    it 'should raise validation errors when required fields are missing' do
+      @klass.required :required_one, String
+      @klass.required :required_two, String
       msg = @klass.new
       block = lambda { msg.encode }
-      expect(&block).to raise_error(JsonMessage::ValidationError)
+      error_checker = lambda do |error|
+        error.should be_a(JsonMessage::ValidationError)
+        error.message.should be_an_instance_of(String)
+        error.message.size.should > 0
+      end
+
+      expect(&block).to raise_error(&error_checker)
     end
 
     it 'should encode fields' do
@@ -155,7 +186,8 @@ describe JsonMessage do
       msg.required = "required"
       msg.no_default = "defined"
 
-      expected = {"required" => "required",
+      expected = {
+                  "required" => "required",
                   "with_default" => "default",
                   "no_default" => "defined"
                  }
@@ -170,13 +202,26 @@ describe JsonMessage do
     end
 
     it 'should raise a parse error when json passed is nil' do
-      expect { @klass.decode(nil) }.to raise_error(JsonMessage::ParseError)
+      error_checker = lambda do |error|
+        error.should be_an_instance_of(JsonMessage::ParseError)
+        error.message.should be_an_instance_of(String)
+        error.message.size.should > 0
+      end
+
+      expect { @klass.decode(nil) }.to raise_error(&error_checker)
     end
 
-    it 'should raise a validation error when required field is missing' do
-      @klass.required :required, String
+    it 'should raise validation errors when required fields are missing' do
+      @klass.required :required_one, String
+      @klass.required :required_two, String
       block = lambda { @klass.decode(Yajl::Encoder.encode({})) }
-      expect(&block).to raise_error(JsonMessage::ValidationError)
+      error_checker = lambda do |error|
+        error.should be_a(JsonMessage::ValidationError)
+        error.message.should be_an_instance_of(String)
+        error.message.size.should > 0
+      end
+
+      expect(&block).to raise_error(&error_checker)
     end
 
     it 'should decode json' do
@@ -186,7 +231,7 @@ describe JsonMessage do
       msg = @klass.new
       encoded = Yajl::Encoder.encode({
                                        "required" => "required",
-                                       "no_default" => "defined",
+                                       "no_default" => "defined"
                                      })
       decoded = @klass.decode(encoded)
       decoded.required.should == "required"

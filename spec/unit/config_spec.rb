@@ -3,15 +3,16 @@ require 'spec_helper'
 
 describe VCAP::Config do
   describe '.define_schema' do
-    it 'should build the corresponding json schema' do
+    it 'should build the corresponding membrane schema' do
       class MyConfig < VCAP::Config
         define_schema do
           [Integer]
         end
       end
 
-      MyConfig.schema.should be_instance_of(VCAP::JsonSchema::ArraySchema)
-      MyConfig.schema.item_schema.should be_instance_of(VCAP::JsonSchema::TypeSchema)
+      MyConfig.schema.should be_instance_of(Membrane::Schema::List)
+      MyConfig.schema.elem_schema.should be_instance_of(Membrane::Schema::Class)
+      MyConfig.schema.elem_schema.klass.should == Integer
     end
   end
 
@@ -40,7 +41,8 @@ describe VCAP::Config do
       cfg.should == exp_cfg
 
       # Invalid config
-      expect { TestConfig.from_file(fixture_path('invalid_config.yml')) }.to raise_error(VCAP::JsonSchema::ValidationError)
+      block = lambda { TestConfig.from_file(fixture_path('invalid_config.yml'))}
+      expect(&block).to raise_error(Membrane::SchemaValidationError)
     end
   end
 end
