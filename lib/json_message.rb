@@ -1,9 +1,7 @@
 # Copyright (c) 2009-2011 VMware, Inc
 require 'rubygems'
-
 require 'yajl'
-
-require 'json_schema'
+require 'membrane'
 
 class JsonMessage
   # Base error class that all other JsonMessage related errors should
@@ -42,12 +40,22 @@ class JsonMessage
       end
 
       @name = name
-      @schema = schema.is_a?(JsonSchema) ? schema : JsonSchema.new(schema)
-      @required = required
-      if default
-        errs = @schema.validate(default)
-        raise ValidationError.new({name => errs}) if errs
+      if schema.is_a?(Membrane::Schema::Base)
+        @schema = schema
+      else
+        @schema = Membrane::SchemaParser.parse { schema }
       end
+
+      @required = required
+
+      if default
+        begin
+          @schema.validate(default)
+        rescue Membrane::SchemaValidationError => e
+          raise ValidationError.new( { name => e.message } )
+        end
+      end
+
       @default = default
     end
   end
@@ -83,7 +91,11 @@ class JsonMessage
         err = nil
         name_s = name.to_s
         if dec_json.has_key?(name_s)
-          err = field.schema.validate(dec_json[name_s])
+          begin
+            field.schema.validate(dec_json[name_s])
+          rescue Membrane::SchemaValidationError => e
+            err = e.message
+          end
         elsif field.required
           err = "Missing field #{name}"
         end
@@ -95,11 +107,11 @@ class JsonMessage
       new(dec_json)
     end
 
-    def required(field_name, schema = JsonSchema::WILDCARD)
+    def required(field_name, schema = Membrane::Schema::ANY)
       define_field(field_name, schema, true)
     end
 
-    def optional(field_name, schema = JsonSchema::WILDCARD, default = nil)
+    def optional(field_name, schema = Membrane::Schema::ANY, default = nil)
       define_field(field_name, schema, false, default)
     end
 
@@ -152,11 +164,15 @@ class JsonMessage
   def set_field(field, value)
     field = field.to_sym
     unless self.class.fields && self.class.fields.has_key?(field)
-      raise ValidationError.new({field => "Unknown field #{field}"})
+      raise ValidationError.new( { field => "Unknown field: #{field}" } )
     end
 
-    errs = self.class.fields[field].schema.validate(value)
-    raise ValidationError.new({field => errs}) if errs
+    begin
+      self.class.fields[field].schema.validate(value)
+    rescue Membrane::SchemaValidationError => e
+      raise ValidationError.new( { field => e.message } )
+    end
+
     @msg[field] = value
   end
 

@@ -2,7 +2,7 @@
 require 'yaml'
 
 require 'vcap/common'
-require 'vcap/json_schema'
+require 'membrane'
 
 module VCAP
   class Config
@@ -10,13 +10,13 @@ module VCAP
       attr_reader :schema
 
       def define_schema(&blk)
-        @schema = VCAP::JsonSchema.build(&blk)
+        @schema = Membrane::SchemaParser.parse(&blk)
       end
 
       def from_file(filename, symbolize_keys=true)
         config = YAML.load_file(filename)
-        @schema.validate(config)
         config = VCAP.symbolize_keys(config) if symbolize_keys
+        @schema.validate(config)
         config
       end
 
@@ -27,6 +27,5 @@ module VCAP
         end
       end
     end
-
   end
 end
