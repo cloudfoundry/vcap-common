@@ -32,6 +32,8 @@ module VCAP
         optional :timeout,      Integer
         optional :provider,     String
         optional :default_plan, String
+        optional :supported_versions, [String]
+        optional :version_aliases, Hash
       end
 
       class BrokeredServiceOfferingRequest < JsonMessage
@@ -65,6 +67,7 @@ module VCAP
 
         optional :plan_option
         optional :provider, String
+        optional :version, String
       end
 
       class GatewayProvisionRequest < JsonMessage
@@ -74,6 +77,7 @@ module VCAP
         required :email, String
 
         optional :plan_option
+        optional :version, String
       end
 
       class GatewayProvisionResponse < JsonMessage
