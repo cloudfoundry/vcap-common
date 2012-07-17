@@ -98,6 +98,11 @@ module VCAP::Services::Api
       Snapshot.decode(resp)
     end
 
+    def update_snapshot_name(args)
+      perform_request(:post, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}/name", args[:msg])
+      EMPTY_REQUEST
+    end
+
     def rollback_snapshot(args)
       resp = perform_request(:put, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}")
       Job.decode(resp)
