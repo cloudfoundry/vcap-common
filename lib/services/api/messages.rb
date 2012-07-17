@@ -135,10 +135,15 @@ module VCAP
         required :snapshot_id,  String
         required :date,  String
         required :size,  Integer
+        required :name,  String
       end
 
       class SnapshotList < JsonMessage
         required :snapshots,  [Object]
+      end
+
+      class UpdateSnapshotNameRequest < JsonMessage
+        required :name, String
       end
 
       class Job < JsonMessage
