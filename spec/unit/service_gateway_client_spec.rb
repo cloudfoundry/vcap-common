@@ -29,7 +29,7 @@ describe VCAP::Services::Api::ServiceGatewayClient do
       resp.should_receive(:response_header).and_return resp_header
       http_method = :get
 
-      VCAP::Services::Api::AsyncHttpRequest.should_receive(:fibered).with(anything, @token, http_method, @timeout, anything).and_return resp
+      VCAP::Services::Api::AsyncHttpRequest.should_receive(:request).with(anything, @token, http_method, @timeout, anything).and_return resp
 
       result = client.perform_request(http_method, path)
       result.should == message

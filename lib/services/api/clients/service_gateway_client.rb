@@ -57,7 +57,8 @@ module VCAP::Services::Api
     end
 
     attr_reader :host, :port, :token
-    def initialize(url, token, timeout, opts={})
+    attr_reader :requester
+    def initialize(url, token, timeout, opts={:requester => AsyncHttpRequest})
       @url = url
       @timeout = timeout
       @token = token
@@ -65,6 +66,8 @@ module VCAP::Services::Api
         'Content-Type' => 'application/json',
         GATEWAY_TOKEN_HEADER => @token
       }
+      # contract: @requester.new.responds_to? :request(url, token, timeout, [msg])
+      @requester = opts.delete(:requester) || AsyncHttpRequest
     end
 
     def provision(args)
@@ -147,7 +150,7 @@ module VCAP::Services::Api
       uri = URI.parse(@url)
       if EM.reactor_running?
         url = URI.parse(uri.to_s + path)
-        http = AsyncHttpRequest.fibered(url, @token, http_method, @timeout, msg)
+        http = requester.request(url, @token, http_method, @timeout, msg)
         raise UnexpectedResponse, "Error sending request #{msg.extract.to_json} to gateway #{@url}: #{http.error}" unless http.error.empty?
         code = http.response_header.status.to_i
         body = http.response
