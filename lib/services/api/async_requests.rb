@@ -2,6 +2,7 @@
 require 'eventmachine'
 require 'em-http-request'
 require 'fiber'
+require 'httpclient'
 
 require 'services/api/const'
 
@@ -31,13 +32,30 @@ module VCAP::Services::Api
         end
       end
 
-      def fibered(url, token, verb, timeout, msg=VCAP::Services::Api::EMPTY_REQUEST)
+      def request(url, token, verb, timeout, msg=VCAP::Services::Api::EMPTY_REQUEST)
         req = new(url, token, verb, timeout, msg)
         f = Fiber.current
         req.callback { f.resume(req) }
         req.errback  { f.resume(req) }
-        Fiber.yield
+        http = Fiber.yield
+        raise UnexpectedResponse, "Error sending request #{msg.extract.to_json} to gateway #{@url}: #{http.error}" unless http.error.empty?
+        code = http.response_header.status.to_i
+        body = http.response
+        [code, body]
       end
+    end
+  end
+
+  module SynchronousHttpRequest
+    def self.request(url, token, verb, timeout, msg=VCAP::Services::Api::EMPTY_REQUEST)
+      header = {
+        VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
+        'Content-Type' => 'application/json',
+      }
+      body = msg.encode
+      client = HTTPClient.new
+      msg = client.request(verb.to_sym, url, :body => body, :header => header)
+      [msg.code, msg.body]
     end
   end
 end

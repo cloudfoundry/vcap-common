@@ -19,17 +19,11 @@ describe VCAP::Services::Api::ServiceGatewayClient do
       EM.should_receive(:reactor_running?).and_return true
 
       path = "/path1"
-      resp = mock("resq")
       message = "data"
-      resp.should_receive(:response).and_return(message)
-      resp.should_receive(:error).and_return []
 
-      resp_header = mock("resq_header")
-      resp_header.should_receive(:status).and_return(200)
-      resp.should_receive(:response_header).and_return resp_header
       http_method = :get
 
-      VCAP::Services::Api::AsyncHttpRequest.should_receive(:fibered).with(anything, @token, http_method, @timeout, anything).and_return resp
+      VCAP::Services::Api::AsyncHttpRequest.should_receive(:request).with(anything, @token, http_method, @timeout, anything).and_return [200, message]
 
       result = client.perform_request(http_method, path)
       result.should == message
