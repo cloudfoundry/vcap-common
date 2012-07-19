@@ -152,8 +152,13 @@ class JsonMessage
     Yajl::Encoder.encode(@msg)
   end
 
-  def extract
-    @msg.dup.freeze
+  def extract(opts = {})
+    hash = @msg.dup
+    if opts[:stringify_keys]
+      hash = hash.inject({}) { |memo,(k,v)| memo[k.to_s] = v; memo }.freeze
+    end
+
+    hash.freeze
   end
 
   protected

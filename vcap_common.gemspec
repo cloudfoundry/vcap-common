@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name = 'vcap_common'
-  s.version = '2.0.0'
+  s.version = '2.0.1'
   s.date = '2012-07-05'
   s.summary = 'vcap common'
   s.homepage = "http://github.com/vmware-ac/core"
@@ -14,7 +14,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency('yajl-ruby', '~> 0.8.3')
   s.add_dependency('nats', '~> 0.4.22.beta.8')
   s.add_dependency('posix-spawn', '~> 0.3.6')
-  s.add_dependency('membrane')
+  s.add_dependency('membrane', '~> 0.0.2')
   s.add_development_dependency('rake', '~> 0.9.2')
 
   s.require_paths = ['lib']

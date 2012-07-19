@@ -254,8 +254,12 @@ describe JsonMessage do
       @klass.optional :optional, String, "default"
       msg = @klass.new
       msg.required = "required"
+
       extracted = msg.extract
       extracted.should == {:required => "required", :optional => "default"}
+
+      extracted = msg.extract(:stringify_keys => true)
+      extracted.should == {"required" => "required", "optional" => "default"}
     end
   end
 end
