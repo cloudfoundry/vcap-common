@@ -81,9 +81,10 @@ module VCAP
         optional :version, String
       end
 
-      class GatewayProvisionResponse < JsonMessage
+      # Provision and bind response use the same format
+      class GatewayHandleResponse < JsonMessage
         required :service_id, String
-        required :data
+        required :configuration
         required :credentials
       end
 
@@ -112,12 +113,6 @@ module VCAP
       class CloudControllerBindResponse < JsonMessage
         required :label,         SERVICE_LABEL_REGEX
         required :binding_token, String
-      end
-
-      class GatewayBindResponse < JsonMessage
-        required :service_id, String
-        required :configuration
-        required :credentials
       end
 
       # Bind app_name using binding_token

@@ -75,7 +75,7 @@ module VCAP::Services::Api
     def provision(args)
       msg = GatewayProvisionRequest.new(args)
       resp = perform_request(:post, '/gateway/v1/configurations', msg)
-      GatewayProvisionResponse.decode(resp)
+      GatewayHandleResponse.decode(resp)
     end
 
     def unprovision(args)
@@ -136,7 +136,7 @@ module VCAP::Services::Api
     def bind(args)
       msg = GatewayBindRequest.new(args)
       resp = perform_request(:post, "/gateway/v1/configurations/#{msg.service_id}/handles", msg)
-      GatewayBindResponse.decode(resp)
+      GatewayHandleResponse.decode(resp)
     end
 
     def unbind(args)
