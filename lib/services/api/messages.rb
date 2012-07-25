@@ -83,7 +83,7 @@ module VCAP
 
       class GatewayProvisionResponse < JsonMessage
         required :service_id, String
-        required :data
+        required :configuration
         required :credentials
       end
 
