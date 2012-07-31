@@ -203,13 +203,14 @@ describe JsonMessage do
       @klass = Class.new(JsonMessage)
     end
 
-    it 'should raise a parse error when json passed is nil' do
-      error_checker = lambda do |error|
+    it 'should raise a parse error when malformed json is passed' do
+      expect { @klass.decode("blah") }.to raise_error { |error|
         error.should be_an_instance_of(JsonMessage::ParseError)
-        error.message.should be_an_instance_of(String)
         error.message.size.should > 0
-      end
+      }
+    end
 
+    it 'should raise a parse error when json passed is nil' do
       expect { @klass.decode(nil) }.to raise_error { |error|
         error.should be_an_instance_of(JsonMessage::ParseError)
         error.message.size.should > 0
