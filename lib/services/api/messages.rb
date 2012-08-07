@@ -76,9 +76,9 @@ module VCAP
         required :name,  String
         required :plan,  String
         required :email, String
+        required :version, String
 
         optional :plan_option
-        optional :version, String
       end
 
       # Provision and bind response use the same format
