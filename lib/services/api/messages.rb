@@ -20,6 +20,7 @@ module VCAP
       class ServiceOfferingRequest < JsonMessage
         required :label,        SERVICE_LABEL_REGEX
         required :url,          URI::regexp(%w(http https))
+        required :supported_versions, [String]
 
         optional :description,  String
         optional :info_url,     URI::regexp(%w(http https))
@@ -33,7 +34,6 @@ module VCAP
         optional :timeout,      Integer
         optional :provider,     String
         optional :default_plan, String
-        optional :supported_versions, [String]
         optional :version_aliases, Hash
       end
 
@@ -65,10 +65,10 @@ module VCAP
         required :label, SERVICE_LABEL_REGEX
         required :name,  String
         required :plan,  String
+        required :version, String
 
         optional :plan_option
         optional :provider, String
-        optional :version, String
       end
 
       class GatewayProvisionRequest < JsonMessage
@@ -76,9 +76,9 @@ module VCAP
         required :name,  String
         required :plan,  String
         required :email, String
+        required :version, String
 
         optional :plan_option
-        optional :version, String
       end
 
       # Provision and bind response use the same format
