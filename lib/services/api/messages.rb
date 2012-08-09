@@ -37,7 +37,7 @@ module VCAP
         optional :version_aliases, Hash
       end
 
-      class BrokeredServiceOfferingRequest < JsonMessage
+      class ProxiedServiceOfferingRequest < JsonMessage
         required :label,        SERVICE_LABEL_REGEX
         required :options,      [{"name" => String, "credentials" => Hash}]
         optional :description,  String
@@ -53,8 +53,8 @@ module VCAP
         required :handles, [Object]
       end
 
-      class ListBrokeredServicesResponse < JsonMessage
-        required :brokered_services, [{"label" => String, "description" => String, "acls" => {"users" => [String], "wildcards" => [String]}}]
+      class ListProxiedServicesResponse < JsonMessage
+        required :proxied_services, [{"label" => String, "description" => String, "acls" => {"users" => [String], "wildcards" => [String]}}]
       end
 
       #
