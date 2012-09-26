@@ -1,7 +1,7 @@
 spec = Gem::Specification.new do |s|
   s.name = 'vcap_common'
-  s.version = '2.0.7'
-  s.date = '2012-08-21'
+  s.version = '2.0.8'
+  s.date = '2012-09-26'
   s.summary = 'vcap common'
   s.homepage = "http://github.com/vmware-ac/core"
   s.description = 'common vcap classes/methods'
@@ -11,7 +11,7 @@ spec = Gem::Specification.new do |s|
 
   s.add_dependency('eventmachine')
   s.add_dependency('thin')
-  s.add_dependency('yajl-ruby', '~> 0.8.3')
+  s.add_dependency('yajl-ruby')
   s.add_dependency('nats', '~> 0.4.24')
   s.add_dependency('posix-spawn', '~> 0.3.6')
   s.add_dependency('membrane', '~> 0.0.2')
