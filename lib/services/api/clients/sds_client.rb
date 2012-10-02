@@ -53,7 +53,7 @@ module VCAP::Services::Api
         multipart = EM::Multipart.new(payload, @upload_hdrs)
         url = URI.parse(uri.to_s + path)
         http = AsyncHttpMultiPartUpload.fibered(url, @timeout, multipart)
-        raise UnexpectedResponse, "Error uploading #{file_path} to serialized_data_server #{@url}: #{http.error}" unless http.error.empty?
+        raise UnexpectedResponse, "Error uploading #{file_path} to serialized_data_server #{@url}: #{http.error}" if http.error
         code = http.response_header.status.to_i
         body = http.response
       else
