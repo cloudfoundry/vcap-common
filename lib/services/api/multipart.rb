@@ -156,13 +156,36 @@ module EventMachine
   end
 end
 
+
+# Ref: https://github.com/igrigorik/em-http-request/commit/28b985f865a2b1560f9b69e0355c47fcd13f7bdc
+class HttpClientOptions
+  attr_accessor :multipart
+end
+
+# Monkeypatch EM:HttpRequest to add multipart support
+module Eventmachine
+  class HttpRequest
+
+    def self.new(uri, options={})
+      connopt = HttpClientOptions.new(uri, options)
+      connopt.multipart = options[:multipart]
+
+      c = HttpConnection.new
+      c.connopts = connopt
+      c.uri = uri
+      c
+    end
+
+  end
+end
+
 ## Support to streaming the file when sending body
 ## TODO FIXME this patch whether depends on specified version???
 module EventMachine
   class HttpClient
     alias_method :original_send_request, :send_request
     def multipart_request?
-      (@req.method == 'POST' or @req.method == 'PUT') and @options[:multipart]
+      (@req.method == 'POST' or @req.method == 'PUT') and @req.multipart
     end
 
     def send_request(head, body)
@@ -170,8 +193,8 @@ module EventMachine
         original_send_request(head, body)
       else
         body = normalize_body(body)
-        multipart = @options[:multipart]
-        query = @options[:query]
+        multipart = @req.multipart
+        query = @req.query
 
         head['content-length'] = multipart.content_length
         head['content-type'] = multipart.content_type
