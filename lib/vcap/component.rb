@@ -1,10 +1,11 @@
 # Copyright (c) 2009-2011 VMware, Inc.
-require "eventmachine"
-require 'thin'
-require "yajl"
-require "nats/client"
 require "base64"
-require 'set'
+require "eventmachine"
+require "monitor"
+require "nats/client"
+require "set"
+require "thin"
+require "yajl"
 
 module VCAP
 
@@ -48,34 +49,79 @@ module VCAP
     CONFIG_SUPPRESS = Set.new([:mbus, :service_mbus, :keys, :database_environment, :password, :pass, :token])
 
     class << self
+      class SafeHash < BasicObject
+        def initialize(hash = {})
+          @hash = hash
+        end
 
-      attr_reader   :varz
+        def threadsafe!
+          @monitor = ::Monitor.new
+        end
+
+        def synchronize
+          if @monitor
+            @monitor.synchronize do
+              begin
+                @thread = ::Thread.current
+                yield
+              ensure
+                @thread = nil
+              end
+            end
+          else
+            yield
+          end
+        end
+
+        def method_missing(sym, *args, &blk)
+          if @monitor && @thread != ::Thread.current
+            ::Kernel.raise "Lock required"
+          end
+
+          @hash.__send__(sym, *args, &blk)
+        end
+      end
+
+      def varz
+        @varz ||= SafeHash.new
+      end
+
       attr_accessor :healthz
 
       def updated_varz
         @last_varz_update ||= 0
+
         if Time.now.to_f - @last_varz_update >= 1
-          # Snapshot uptime
-          @varz[:uptime] = VCAP.uptime_string(Time.now - @varz[:start])
-
-          # Grab current cpu and memory usage.
+          # Grab current cpu and memory usage
           rss, pcpu = `ps -o rss=,pcpu= -p #{Process.pid}`.split
-          @varz[:mem] = rss.to_i
-          @varz[:cpu] = pcpu.to_f
 
-          @last_varz_update = Time.now.to_f
+          # Update varz
+          varz.synchronize do
+            @last_varz_update = Time.now.to_f
+
+            varz[:uptime] = VCAP.uptime_string(Time.now - varz[:start])
+            varz[:mem] = rss.to_i
+            varz[:cpu] = pcpu.to_f
+
+            # Return duplicate while holding lock
+            return varz.dup
+          end
+        else
+          # Return duplicate while holding lock
+          varz.synchronize do
+            return varz.dup
+          end
         end
-        varz
       end
 
       def updated_healthz
         @last_healthz_update ||= 0
+
         if Time.now.to_f - @last_healthz_update >= 1
-          # ...
           @last_healthz_update = Time.now.to_f
         end
 
-        healthz
+        healthz.dup
       end
 
       def start_http_server(host, port, auth, logger)
@@ -120,9 +166,11 @@ module VCAP
         }
 
         # Varz is customizable
-        @varz = @discover.dup
-        @varz[:num_cores] = VCAP.num_cores
-        @varz[:config] = sanitize_config(opts[:config]) if opts[:config]
+        varz.synchronize do
+          varz.merge!(@discover.dup)
+          varz[:num_cores] = VCAP.num_cores
+          varz[:config] = sanitize_config(opts[:config]) if opts[:config]
+        end
 
         @healthz = "ok\n".freeze
 
