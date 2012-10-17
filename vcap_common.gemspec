@@ -20,6 +20,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency('multipart-post')
   s.add_dependency('mime-types')
   s.add_development_dependency('rake', '~> 0.9.2')
+  s.add_development_dependency('rspec')
 
   s.require_paths = ['lib']
 
