@@ -16,11 +16,12 @@ spec = Gem::Specification.new do |s|
   s.add_dependency('posix-spawn', '~> 0.3.6')
   s.add_dependency('membrane', '~> 0.0.2')
   s.add_dependency('httpclient')
-  s.add_dependency('em-http-request', '~> 1.0.0.beta3')
+  s.add_dependency('em-http-request', '~> 1.0.0.beta3', '< 1.0.2')
   s.add_dependency('multipart-post')
   s.add_dependency('mime-types')
   s.add_development_dependency('rake', '~> 0.9.2')
   s.add_development_dependency('rspec')
+  s.add_development_dependency('sinatra')
 
   s.require_paths = ['lib']
 
