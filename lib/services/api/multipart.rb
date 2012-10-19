@@ -158,6 +158,10 @@ end
 
 ## Support to streaming the file when sending body
 ## TODO FIXME this patch whether depends on specified version???
+## FIXME: yes it depends on a very specific beta version, yuck
+## FIXME: a less gross alternative is to stream out the request body to disk,
+## and use the :file option to instruct em-http-request to stream the body
+## from disk
 module EventMachine
   class HttpClient
     alias_method :original_send_request, :send_request
