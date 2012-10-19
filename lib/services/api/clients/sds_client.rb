@@ -21,12 +21,27 @@ module VCAP::Services::Api
     class SDSErrorResponse < StandardError; end
     class UnexpectedResponse < StandardError; end
 
-    def initialize(url, upload_token, timeout=60, opts={})
+    # @return [#request] an object that has responds to #request and returns a
+    #   2-element array of [code, body]
+    attr_reader :requester
+
+    # FIXME: Move all call sites to either not specify timeout or put it in
+    # options hash. I hate doing overloading in Ruby and Python, but this is
+    # for backwards compatibility
+    # @overload new(url, token, timeout=60, opts={:requester => AsyncHttpMultiPartUpload})
+    # @overload new(url, token, opts)
+    # @overload new(url, token, timeout)
+    def initialize(url, upload_token, timeout=60,
+                   opts={:requester => AsyncHttpMultiPartUpload})
       @url = url
-      @timeout = timeout
-      @hdrs  = {
-        'Content-Type' => 'application/json',
-      }
+      if timeout.respond_to?(:to_f)
+        @timeout = timeout
+      else
+        # the 3rd arg is actually opts...
+        opts = timeout
+        @timeout = opts.fetch(:timeout, 60)
+      end
+      @requester = opts[:requester] || AsyncHttpMultiPartUpload
       @upload_hdrs = {
         'Content-Type' => 'multipart/form-data',
         SDS_UPLOAD_TOKEN_HEADER => upload_token
@@ -45,25 +60,22 @@ module VCAP::Services::Api
       result = nil
       uri = URI.parse(@url)
 
-      mime_types = MIME::Types.type_for(file_path) || []
-      mime_types << "application/octet-stream" if mime_types.empty?
-
       if EM.reactor_running?
-        payload = {:_method => 'put', :data_file => EM::StreamUploadIO.new(file_path, mime_types[0])}
-        multipart = EM::Multipart.new(payload, @upload_hdrs)
-        url = URI.parse(uri.to_s + path)
-        http = AsyncHttpMultiPartUpload.fibered(url, @timeout, multipart)
-        raise UnexpectedResponse, "Error uploading #{file_path} to serialized_data_server #{@url}: #{http.error}" unless http.error.empty?
-        code = http.response_header.status.to_i
-        body = http.response
+        url = URI.join(@url, path)
+        code, body = requester.request(
+          "PUT",
+          url,
+          file_path,
+          :headers => @upload_hdrs,
+          :timeout => @timeout,
+        )
       else
-        payload = {:_method => 'put', :data_file => UploadIO.new(file_path, mime_types[0])}
-        req = Net::HTTP::Post::Multipart.new(path, payload, @upload_hdrs)
-        resp = Net::HTTP.new(uri.host, uri.port).start do |http|
-          http.request(req)
-        end
-        code = resp.code.to_i
-        body = resp.body
+        code, body = SynchronousMultipartUpload.request(
+          "PUT",
+          url,
+          file_path,
+          :headers => @upload_hdrs,
+        )
       end
       case code
       when 200
