@@ -82,6 +82,49 @@ module VCAP::Services::Api
         req.errback {f.resume(req)}
         Fiber.yield
       end
+
+      # @param ["PUT", "POST"] method the HTTP verb for the request, currently
+      #     ignored and an emulated PUT is always used
+      # @param [URI::Generic] url
+      # @param [String] file_path the data file to be imported to SDS
+      # @param [Hash] opts
+      # @option opts [Hash] :headers
+      # @option opts [Numeric] :timeout
+      # @return [[code, body]]
+      def request(method, url, file_path, opts = {})
+        mime_types = MIME::Types.type_for(file_path) || []
+        mime_types << "application/octet-stream" if mime_types.empty?
+
+        payload = {:_method => 'put', :data_file => EM::StreamUploadIO.new(file_path, mime_types[0])}
+        multipart = EM::Multipart.new(payload, opts[:headers])
+        # url = URI.parse(uri.to_s + path)
+        http = fibered(url, opts[:timeout], multipart)
+        raise UnexpectedResponse, "Error uploading #{file_path} to serialized_data_server #{@url}: #{http.error}" unless http.error.empty?
+        code = http.response_header.status.to_i
+        body = http.response
+        [code, body]
+      end
+    end
+  end
+
+  class SynchronousMultipartUpload
+      # @param ["PUT", "POST"] method the HTTP verb for the request, currently
+      #     ignored and an emulated PUT is always used
+      # @param [URI::Generic] url
+      # @param [String] file_path the data file to be imported to SDS
+      # @param [Hash] opts
+      # @option opts [Hash] :headers
+      # @return [[code, body]]
+    def self.request(method, url, file_path, opts = {})
+      mime_types = MIME::Types.type_for(file_path) || []
+      mime_types << "application/octet-stream" if mime_types.empty?
+
+      payload = {:_method => 'put', :data_file => UploadIO.new(file_path, mime_types[0])}
+      req = Net::HTTP::Post::Multipart.new(url.request_uri, payload, opts[:headers])
+      resp = Net::HTTP.new(url.host, url.port).start do |http|
+        http.request(req)
+      end
+      [resp.code.to_i, resp.body]
     end
   end
 end

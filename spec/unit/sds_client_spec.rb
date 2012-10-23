@@ -53,6 +53,47 @@ describe VCAP::Services::Api::SDSClient do
       MockServer.last_request.headers["HTTP_X_VCAP_SDS_UPLOAD_TOKEN"].should == "secret"
     end
 
+    it "issues a PUT to serialization data server (with synchronous requester)" do
+      MockServer.stubbed_status = 200
+      MockServer.stubbed_body = "{\"url\": \"http://example.com/foo\"}"
+      port = VCAP::grab_ephemeral_port
+      server = Thin::Server.new("localhost", port, MockServer)
+      server.silent = true
+      Thread.new { server.start }
+
+      f = Tempfile.new("foo")
+      f.write("bar\n")
+      f.close
+
+      client = VCAP::Services::Api::SDSClient.new(
+        "http://localhost:#{port}",
+        "secret",
+        2,
+        :requester => VCAP::Services::Api::SynchronousMultipartUpload,
+      )
+      EM.error_handler do |e|
+        raise e
+      end
+      Timeout.timeout(0.5) do
+        sleep 0.02 until server.running?
+      end
+      server.should be_running
+
+      client.import_from_data(
+        :service => "redis",
+        :service_id => "deadbeef",
+        :msg => f.path,
+      )
+      server.stop
+      Timeout.timeout(0.5) do
+        EM.reactor_thread.join
+      end
+      f.unlink
+      MockServer.last_request.forms["data_file"].should_not be_nil
+      MockServer.last_request.forms["data_file"][:tempfile].read.should == "bar\n"
+      MockServer.last_request.headers["HTTP_X_VCAP_SDS_UPLOAD_TOKEN"].should == "secret"
+    end
+
     it "issues a PUT to serialization data server (without EM)" do
       MockServer.stubbed_status = 200
       MockServer.stubbed_body = "{\"url\": \"http://example.com/foo\"}"
@@ -78,6 +119,7 @@ describe VCAP::Services::Api::SDSClient do
         "http://localhost:#{port}",
         "secret",
         2,
+        :requester => VCAP::Services::Api::SynchronousMultipartUpload,
       )
       Timeout.timeout(0.5) do
         sleep 0.02 until server && server.status == :Running
