@@ -4,6 +4,7 @@ require 'net/http/post/multipart'
 require 'mime/types'
 require 'uri'
 
+require 'eventmachine'
 require 'services/api/const'
 require 'services/api/messages'
 require 'services/api/multipart'
@@ -23,10 +24,9 @@ module VCAP::Services::Api
 
     def initialize(url, upload_token, timeout=60, opts={})
       @url = url
+      # the options hash can't be specified in Ruby if caller omits timeout...
+      raise ArgumentError unless timeout.respond_to?(:to_f)
       @timeout = timeout
-      @hdrs  = {
-        'Content-Type' => 'application/json',
-      }
       @upload_hdrs = {
         'Content-Type' => 'multipart/form-data',
         SDS_UPLOAD_TOKEN_HEADER => upload_token
@@ -43,28 +43,21 @@ module VCAP::Services::Api
     def perform_multipart_upload(path, file_path)
       # upload file using multipart/form data
       result = nil
-      uri = URI.parse(@url)
+      url = URI.join(@url, path)
 
-      mime_types = MIME::Types.type_for(file_path) || []
-      mime_types << "application/octet-stream" if mime_types.empty?
+      requester = if EM.reactor_thread?
+                    AsyncHttpMultiPartUpload
+                  else
+                    SynchronousMultipartUpload
+                  end
 
-      if EM.reactor_running?
-        payload = {:_method => 'put', :data_file => EM::StreamUploadIO.new(file_path, mime_types[0])}
-        multipart = EM::Multipart.new(payload, @upload_hdrs)
-        url = URI.parse(uri.to_s + path)
-        http = AsyncHttpMultiPartUpload.fibered(url, @timeout, multipart)
-        raise UnexpectedResponse, "Error uploading #{file_path} to serialized_data_server #{@url}: #{http.error}" unless http.error.empty?
-        code = http.response_header.status.to_i
-        body = http.response
-      else
-        payload = {:_method => 'put', :data_file => UploadIO.new(file_path, mime_types[0])}
-        req = Net::HTTP::Post::Multipart.new(path, payload, @upload_hdrs)
-        resp = Net::HTTP.new(uri.host, uri.port).start do |http|
-          http.request(req)
-        end
-        code = resp.code.to_i
-        body = resp.body
-      end
+      code, body = requester.request(
+        "PUT",
+        url,
+        file_path,
+        :headers => @upload_hdrs,
+        :timeout => @timeout,
+      )
       case code
       when 200
         body
