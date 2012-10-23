@@ -4,6 +4,7 @@ require 'net/http/post/multipart'
 require 'mime/types'
 require 'uri'
 
+require 'eventmachine'
 require 'services/api/const'
 require 'services/api/messages'
 require 'services/api/multipart'
@@ -23,10 +24,9 @@ module VCAP::Services::Api
 
     def initialize(url, upload_token, timeout=60, opts={})
       @url = url
+      # the options hash can't be specified in Ruby if caller omits timeout...
+      raise ArgumentError unless timeout.respond_to?(:to_f)
       @timeout = timeout
-      @hdrs  = {
-        'Content-Type' => 'application/json',
-      }
       @upload_hdrs = {
         'Content-Type' => 'multipart/form-data',
         SDS_UPLOAD_TOKEN_HEADER => upload_token
@@ -48,7 +48,7 @@ module VCAP::Services::Api
       mime_types = MIME::Types.type_for(file_path) || []
       mime_types << "application/octet-stream" if mime_types.empty?
 
-      if EM.reactor_running?
+      if EM.reactor_thread?
         payload = {:_method => 'put', :data_file => EM::StreamUploadIO.new(file_path, mime_types[0])}
         multipart = EM::Multipart.new(payload, @upload_hdrs)
         url = URI.parse(uri.to_s + path)
