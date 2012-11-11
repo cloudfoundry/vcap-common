@@ -144,6 +144,9 @@ module VCAP
         @discover[:uuid]
       end
 
+      # Announces the availability of this component to NATS.
+      # Returns the published configuration of the component,
+      # including the ephemeral port and credentials.
       def register(opts)
         uuid = VCAP.secure_uuid
         type = opts[:type]
@@ -188,6 +191,8 @@ module VCAP
 
         # Also announce ourselves on startup..
         nats.publish('vcap.component.announce', @discover.to_json)
+
+        @discover
       end
 
       def update_discover_uptime
