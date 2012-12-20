@@ -79,6 +79,9 @@ module VCAP
         required :version, String
 
         optional :plan_option
+
+        optional :user_uuid, String
+        optional :space_uuid, String
       end
 
       # Provision and bind response use the same format
