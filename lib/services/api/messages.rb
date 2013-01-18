@@ -77,6 +77,7 @@ module VCAP
         required :plan,  String
         required :email, String
         required :version, String
+        optional :provider, String
 
         optional :plan_option
 
