@@ -82,7 +82,7 @@ module VCAP
 
         optional :plan_option
 
-        optional :user_guid, String
+        optional :organization_guid, String
         optional :space_guid, String
       end
 
