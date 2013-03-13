@@ -36,6 +36,7 @@ module VCAP
         optional :timeout,      Integer
         optional :provider,     String
         optional :default_plan, String
+        optional :bs,           String
       end
 
       class ProxiedServiceOfferingRequest < JsonMessage
