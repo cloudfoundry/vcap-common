@@ -143,6 +143,20 @@ module VCAP
         required :snapshots,  [Object]
       end
 
+      class SnapshotV2 < JsonMessage
+        required :snapshot_id, String
+        required :name,  String
+        required :state, String
+        required :size,  Integer
+
+        optional :created_time,  String
+        optional :restored_time, String
+      end
+
+      class SnapshotListV2 < JsonMessage
+        required :snapshots, [Object]
+      end
+
       class UpdateSnapshotNameRequest < JsonMessage
         required :name, String
       end
