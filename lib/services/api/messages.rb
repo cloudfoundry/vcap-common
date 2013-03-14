@@ -26,6 +26,16 @@ module VCAP
         optional :description,  String
         optional :info_url,     URI::regexp(%w(http https))
         optional :tags,         [String]
+        optional :plan_details do
+          [
+            {
+              "name" => String,
+              "free" => bool,
+              optional("description") => String,
+              optional("extra") => String,
+            }
+          ]
+        end
         optional :plans,        [String]
         optional :plan_descriptions
         optional :cf_plan_id
