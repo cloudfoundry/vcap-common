@@ -7,14 +7,14 @@ describe VCAP::Subprocess do
 
   describe '#run' do
     it 'should capture both stdout and stderr' do
-      stdout, stderr, status = @subprocess.run('echo -n foo >&2')
-      stdout.should == ''
-      stderr.should == 'foo'
+      stdout, stderr, status = @subprocess.run('echo foo >&2')
+      stdout.should == ""
+      stderr.should == "foo\n"
       status.should == 0
 
-      stdout, stderr, status = @subprocess.run('echo -n foo')
-      stdout.should == 'foo'
-      stderr.should == ''
+      stdout, stderr, status = @subprocess.run('echo foo')
+      stdout.should == "foo\n"
+      stderr.should == ""
       status.should == 0
     end
 

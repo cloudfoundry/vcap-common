@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'open3'
 
 describe VCAP::ProcessUtils do
   describe '.get_stats' do
