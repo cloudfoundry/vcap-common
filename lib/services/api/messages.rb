@@ -154,6 +154,10 @@ module VCAP
         required :snapshots,  [Object]
       end
 
+      class CreateSnapshotV2Request < JsonMessage
+        required :name, /./
+      end
+
       class SnapshotV2 < JsonMessage
         required :snapshot_id, String
         required :name,  String
