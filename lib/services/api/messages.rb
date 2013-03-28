@@ -61,6 +61,12 @@ module VCAP
         required :credentials
       end
 
+      class HandleUpdateRequestV2 < JsonMessage
+        required :token, String
+        required :gateway_data
+        required :credentials
+      end
+
       class ListHandlesResponse < JsonMessage
         required :handles, [Object]
       end
