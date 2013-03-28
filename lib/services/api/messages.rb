@@ -33,6 +33,7 @@ module VCAP
               "free" => bool,
               optional("description") => String,
               optional("extra") => String,
+              optional("unique_id") => String,
             }
           ]
         end
