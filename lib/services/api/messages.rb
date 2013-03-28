@@ -47,6 +47,7 @@ module VCAP
         optional :provider,     String
         optional :default_plan, String
         optional :extra,        String
+        optional :unique_id,    String
       end
 
       class ProxiedServiceOfferingRequest < JsonMessage
@@ -102,6 +103,7 @@ module VCAP
 
         optional :organization_guid, String
         optional :space_guid, String
+        optional :unique_id, String
       end
 
       # Provision and bind response use the same format
