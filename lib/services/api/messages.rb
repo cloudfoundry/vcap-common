@@ -124,9 +124,10 @@ module VCAP
       end
 
       class GatewayBindRequest < JsonMessage
-        required :service_id,    String
-        required :label,         String
-        required :email,         String
+        required :service_id,     String
+        required :label,          String
+        required :email,          String
+        optional :service_instance_guid, String
         required :binding_options
       end
 
