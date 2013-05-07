@@ -22,6 +22,7 @@ module VCAP
         required :url,          URI::regexp(%w(http https))
         required :supported_versions, [String]
         required :version_aliases, Hash
+        required :unique_id,    String
 
         optional :description,  String
         optional :info_url,     URI::regexp(%w(http https))
@@ -29,11 +30,11 @@ module VCAP
         optional :plan_details do
           [
             {
+              "unique_id" => String,
               "name" => String,
               "free" => bool,
               optional("description") => String,
               optional("extra") => String,
-              optional("unique_id") => String,
             }
           ]
         end
@@ -48,7 +49,6 @@ module VCAP
         optional :provider,     String
         optional :default_plan, String
         optional :extra,        String
-        optional :unique_id,    String
       end
 
       class ProxiedServiceOfferingRequest < JsonMessage
@@ -97,6 +97,7 @@ module VCAP
         required :plan,  String
         required :email, String
         required :version, String
+        required :unique_id, String
 
         optional :provider, String
 
@@ -104,7 +105,6 @@ module VCAP
 
         optional :organization_guid, String
         optional :space_guid, String
-        optional :unique_id, String
       end
 
       # Provision and bind response use the same format
