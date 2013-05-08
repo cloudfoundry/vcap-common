@@ -112,6 +112,7 @@ module VCAP
         required :service_id, String
         required :configuration
         required :credentials
+        optional :dashboard_url, String
       end
 
       #
