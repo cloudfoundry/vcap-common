@@ -6,6 +6,7 @@ require "nats/client"
 require "set"
 require "thin"
 require "yajl"
+require "vmstat"
 
 module VCAP
 
@@ -102,6 +103,12 @@ module VCAP
             varz[:uptime] = VCAP.uptime_string(Time.now - varz[:start])
             varz[:mem] = rss.to_i
             varz[:cpu] = pcpu.to_f
+
+            memory = Vmstat.memory
+            varz[:mem_used_bytes] = memory.active_bytes + memory.wired_bytes
+            varz[:mem_free_bytes] = memory.inactive_bytes + memory.free_bytes
+
+            varz[:cpu_load_avg] = Vmstat.load_average.one_minute
 
             # Return duplicate while holding lock
             return varz.dup

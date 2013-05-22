@@ -58,6 +58,35 @@ describe VCAP::Component do
     end
   end
 
+  describe 'process information' do
+    before do
+      VCAP::Component.instance_eval do
+        remove_instance_variable(:@last_varz_update) if instance_variable_defined?(:@last_varz_update)
+      end
+
+      em do
+        VCAP::Component.register({})
+        done
+      end
+    end
+
+    it 'includes memory information' do
+      Vmstat.stub_chain(:memory, :active_bytes).and_return 75
+      Vmstat.stub_chain(:memory, :wired_bytes).and_return 25
+      Vmstat.stub_chain(:memory, :inactive_bytes).and_return 660
+      Vmstat.stub_chain(:memory, :free_bytes).and_return 340
+
+      VCAP::Component.updated_varz[:mem_used_bytes].should == 100
+      VCAP::Component.updated_varz[:mem_free_bytes].should == 1000
+    end
+
+    it 'includes CPU information' do
+      Vmstat.stub_chain(:load_average, :one_minute).and_return 2.0
+
+      VCAP::Component.updated_varz[:cpu_load_avg].should == 2.0
+    end
+  end
+
   describe 'suppression of keys in config information in varz' do
     it 'should suppress certain keys in the top level config' do
       em do
