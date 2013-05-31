@@ -92,19 +92,16 @@ module VCAP
       end
 
       class GatewayProvisionRequest < JsonMessage
-        required :label, SERVICE_LABEL_REGEX
-        required :name,  String
-        required :plan,  String
-        required :email, String
-        required :version, String
+        required :unique_id, String
+        required :name,      String
+        required :email,     String
 
-        optional :provider, String
-
-        optional :plan_option
-
+        optional :provider,          String
+        optional :label,             String
+        optional :plan,              String
+        optional :version,           String
         optional :organization_guid, String
-        optional :space_guid, String
-        optional :unique_id, String
+        optional :space_guid,        String
       end
 
       # Provision and bind response use the same format
