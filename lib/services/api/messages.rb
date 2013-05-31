@@ -102,6 +102,7 @@ module VCAP
         optional :version,           String
         optional :organization_guid, String
         optional :space_guid,        String
+        optional :plan_option
       end
 
       # Provision and bind response use the same format
