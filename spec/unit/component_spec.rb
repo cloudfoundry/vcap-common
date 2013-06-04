@@ -1,6 +1,7 @@
 # Copyright (c) 2009-2012 VMware, Inc.
 
 require "spec_helper"
+require "unit/em_fiber_wrap"
 
 require "vcap/component"
 
@@ -50,6 +51,41 @@ describe VCAP::Component do
           VCAP::Component.varz[:foo]
         end.to_not raise_error
       end
+    end
+  end
+
+  describe "register" do
+    it "throws an exception if no logger is provided as an arg" do
+      expect {
+        em_fiber_wrap {
+          VCAP::Component.register(
+            :type => "Component",
+            :host => "127.0.0.1",
+            :index => 1,
+            :nats => nil,
+            :port => 8080,
+            :user => "user",
+            :password => "password"
+          )
+        }
+      }.to raise_error(VCAP::LoggerError)
+    end
+
+    it "throws an exception if a Steno logger is not provided as an arg" do
+      expect {
+        em_fiber_wrap {
+          VCAP::Component.register(
+            :type => "Component",
+            :host => "127.0.0.1",
+            :index => 1,
+            :nats => nil,
+            :port => 8080,
+            :user => "user",
+            :password => "password",
+            :logger => Logger.new(nil)
+          )
+        }
+      }.to raise_error(VCAP::LoggerError)
     end
   end
 end

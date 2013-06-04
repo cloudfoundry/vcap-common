@@ -7,6 +7,7 @@ require "set"
 require "thin"
 require "yajl"
 require "vmstat"
+require "steno"
 
 module VCAP
 
@@ -83,6 +84,8 @@ module VCAP
         end
       end
 
+      attr_reader :logger
+
       def varz
         @varz ||= SafeHash.new
       end
@@ -151,6 +154,8 @@ module VCAP
         @discover[:uuid]
       end
 
+      class ::VCAP::LoggerError < StandardError; end
+
       # Announces the availability of this component to NATS.
       # Returns the published configuration of the component,
       # including the ephemeral port and credentials.
@@ -163,7 +168,9 @@ module VCAP
         port = opts[:port] || VCAP.grab_ephemeral_port
         nats = opts[:nats] || NATS
         auth = [opts[:user] || VCAP.secure_uuid, opts[:password] || VCAP.secure_uuid]
-        logger = opts[:logger] || Logger.new(nil)
+
+        logger = opts[:logger]
+        raise ::VCAP::LoggerError unless logger.is_a? Steno::Logger
 
         # Discover message limited
         @discover = {

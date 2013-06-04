@@ -6,8 +6,13 @@ require "em-http/version"
 describe VCAP::Component do
   include VCAP::Spec::EM
 
+  let(:logger) { Steno.logger("blah") }
   let(:nats) { NATS.connect(:uri => "nats://localhost:4223", :autostart => true) }
-  let(:default_options) { { :type => "type", :nats => nats } }
+  let(:default_options) { { :type => "type", :nats => nats, :logger => logger } }
+
+  before do
+    Steno.init(Steno::Config.new)
+  end
 
   after :all do
     if File.exists? NATS::AUTOSTART_PID_FILE
@@ -65,7 +70,7 @@ describe VCAP::Component do
       end
 
       em do
-        VCAP::Component.register({})
+        VCAP::Component.register({:logger => logger })
         done
       end
     end
@@ -90,7 +95,7 @@ describe VCAP::Component do
   describe 'suppression of keys in config information in varz' do
     it 'should suppress certain keys in the top level config' do
       em do
-        options = { :type => 'suppress_test', :nats => nats }
+        options = { :type => 'suppress_test', :nats => nats, :logger => logger }
         options[:config] = {
           :mbus => 'nats://user:pass@localhost:4223',
           :keys => 'sekret!keys',
@@ -107,7 +112,7 @@ describe VCAP::Component do
 
     it 'should suppress certain keys at any level in config' do
       em do
-        options = { :type => 'suppress_test', :nats => nats }
+        options = { :type => 'suppress_test', :nats => nats, :logger => logger }
         options[:config] = {
           :mbus => 'nats://user:pass@localhost:4223',
           :keys => 'sekret!keys',
@@ -124,7 +129,7 @@ describe VCAP::Component do
 
     it 'should leave config its passed untouched' do
       em do
-        options = { :type => 'suppress_test', :nats => nats }
+        options = { :type => 'suppress_test', :nats => nats, :logger => logger }
         options[:config] = {
           :mbus => 'nats://user:pass@localhost:4223',
           :keys => 'sekret!keys',
