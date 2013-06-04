@@ -267,6 +267,44 @@ describe VCAP::Component do
     end
   end
 
+  describe "varz log_counts" do
+    let(:host) { VCAP::Component.varz[:host] }
+    let(:authorization) { { :head => { "authorization" => VCAP::Component.varz[:credentials] } } }
+
+    it "returns the number of logs correctly" do
+      logger = Steno.logger("test")
+      logger.info("info")
+      logger.debug("debug 1")
+      logger.debug("debug 2")
+
+      em(:timeout => 2) do
+        VCAP::Component.register(
+          :type => "Component",
+          :host => "127.0.0.1",
+          :index => 1,
+          :nats => nats,
+          :port => 8080,
+          :user => "user",
+          :password => "password",
+          :logger => logger
+        )
+
+        request = make_em_httprequest(:get, host, "/varz", authorization)
+        request.callback do
+          expected_hash = {}
+          Steno::Logger::LEVELS.each do |level_name, level|
+            expected_hash[level_name.to_s] = level.count
+          end
+
+          request.response_header.status.should == 200
+          found = Yajl::Parser.parse(request.response)["log_counts"]
+          expect(found).to eq expected_hash
+          done
+        end
+      end
+    end
+  end
+
   def make_em_httprequest(method, host, path, opts={})
     ::EM::HttpRequest.new("http://#{host}#{path}").send(method, opts)
   end

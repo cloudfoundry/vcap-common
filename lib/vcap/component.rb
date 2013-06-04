@@ -44,6 +44,20 @@ module VCAP
     end
   end
 
+  class LogLevelCounts
+    def initialize(logger)
+      @logger = logger
+    end
+
+    def to_json
+      hash = {}
+      Steno::Logger::LEVELS.each do |level_name, level|
+        hash[level_name] = level.count
+      end
+      Yajl::Encoder.encode(hash)
+    end
+  end
+
   # Common component setup for discovery and monitoring
   class Component
 
@@ -187,6 +201,8 @@ module VCAP
           varz.merge!(@discover.dup)
           varz[:num_cores] = VCAP.num_cores
           varz[:config] = sanitize_config(opts[:config]) if opts[:config]
+
+          varz[:log_counts] = LogLevelCounts.new(logger)
         end
 
         @healthz = "ok\n".freeze
