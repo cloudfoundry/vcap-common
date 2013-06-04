@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name = 'vcap_common'
-  s.version = '3.0.0'
+  s.version = '2.0.10'
   s.date = '2012-10-25'
   s.summary = 'vcap common'
   s.homepage = "http://github.com/vmware-ac/core"
@@ -23,7 +23,6 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency('rake', '~> 0.9.2')
   s.add_development_dependency('rspec')
   s.add_development_dependency('sinatra')
-  s.add_development_dependency('steno')
 
   s.require_paths = ['lib']
 

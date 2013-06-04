@@ -7,7 +7,6 @@ require "set"
 require "thin"
 require "yajl"
 require "vmstat"
-require "steno"
 
 module VCAP
 
@@ -41,20 +40,6 @@ module VCAP
     rescue => e
       @logger.error "healthz error #{e.inspect} #{e.backtrace.join("\n")}"
       raise e
-    end
-  end
-
-  class LogLevelCounts
-    def initialize(logger)
-      @logger = logger
-    end
-
-    def to_json
-      hash = {}
-      Steno::Logger::LEVELS.each do |level_name, level|
-        hash[level_name] = level.count
-      end
-      Yajl::Encoder.encode(hash)
     end
   end
 
@@ -97,8 +82,6 @@ module VCAP
           @hash.__send__(sym, *args, &blk)
         end
       end
-
-      attr_reader :logger
 
       def varz
         @varz ||= SafeHash.new
@@ -168,8 +151,6 @@ module VCAP
         @discover[:uuid]
       end
 
-      class ::VCAP::LoggerError < StandardError; end
-
       # Announces the availability of this component to NATS.
       # Returns the published configuration of the component,
       # including the ephemeral port and credentials.
@@ -182,9 +163,7 @@ module VCAP
         port = opts[:port] || VCAP.grab_ephemeral_port
         nats = opts[:nats] || NATS
         auth = [opts[:user] || VCAP.secure_uuid, opts[:password] || VCAP.secure_uuid]
-
-        logger = opts[:logger]
-        raise ::VCAP::LoggerError unless logger.is_a? Steno::Logger
+        logger = opts[:logger] || Logger.new(nil)
 
         # Discover message limited
         @discover = {
@@ -201,8 +180,6 @@ module VCAP
           varz.merge!(@discover.dup)
           varz[:num_cores] = VCAP.num_cores
           varz[:config] = sanitize_config(opts[:config]) if opts[:config]
-
-          varz[:log_counts] = LogLevelCounts.new(logger)
         end
 
         @healthz = "ok\n".freeze

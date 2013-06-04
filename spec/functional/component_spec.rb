@@ -6,13 +6,8 @@ require "em-http/version"
 describe VCAP::Component do
   include VCAP::Spec::EM
 
-  let(:logger) { Steno.logger("blah") }
   let(:nats) { NATS.connect(:uri => "nats://localhost:4223", :autostart => true) }
-  let(:default_options) { { :type => "type", :nats => nats, :logger => logger } }
-
-  before do
-    Steno.init(Steno::Config.new)
-  end
+  let(:default_options) { { :type => "type", :nats => nats } }
 
   after :all do
     if File.exists? NATS::AUTOSTART_PID_FILE
@@ -70,7 +65,7 @@ describe VCAP::Component do
       end
 
       em do
-        VCAP::Component.register({:logger => logger })
+        VCAP::Component.register({})
         done
       end
     end
@@ -95,7 +90,7 @@ describe VCAP::Component do
   describe 'suppression of keys in config information in varz' do
     it 'should suppress certain keys in the top level config' do
       em do
-        options = { :type => 'suppress_test', :nats => nats, :logger => logger }
+        options = { :type => 'suppress_test', :nats => nats }
         options[:config] = {
           :mbus => 'nats://user:pass@localhost:4223',
           :keys => 'sekret!keys',
@@ -112,7 +107,7 @@ describe VCAP::Component do
 
     it 'should suppress certain keys at any level in config' do
       em do
-        options = { :type => 'suppress_test', :nats => nats, :logger => logger }
+        options = { :type => 'suppress_test', :nats => nats }
         options[:config] = {
           :mbus => 'nats://user:pass@localhost:4223',
           :keys => 'sekret!keys',
@@ -129,7 +124,7 @@ describe VCAP::Component do
 
     it 'should leave config its passed untouched' do
       em do
-        options = { :type => 'suppress_test', :nats => nats, :logger => logger }
+        options = { :type => 'suppress_test', :nats => nats }
         options[:config] = {
           :mbus => 'nats://user:pass@localhost:4223',
           :keys => 'sekret!keys',
@@ -261,44 +256,6 @@ describe VCAP::Component do
         request = make_em_httprequest(:get, host, "/varz", :head => { "authorization" => "foo" })
         request.callback do
           request.response_header.status.should == 400
-          done
-        end
-      end
-    end
-  end
-
-  describe "varz log_counts" do
-    let(:host) { VCAP::Component.varz[:host] }
-    let(:authorization) { { :head => { "authorization" => VCAP::Component.varz[:credentials] } } }
-
-    it "returns the number of logs correctly" do
-      logger = Steno.logger("test")
-      logger.info("info")
-      logger.debug("debug 1")
-      logger.debug("debug 2")
-
-      em(:timeout => 2) do
-        VCAP::Component.register(
-          :type => "Component",
-          :host => "127.0.0.1",
-          :index => 1,
-          :nats => nats,
-          :port => 8080,
-          :user => "user",
-          :password => "password",
-          :logger => logger
-        )
-
-        request = make_em_httprequest(:get, host, "/varz", authorization)
-        request.callback do
-          expected_hash = {}
-          Steno::Logger::LEVELS.each do |level_name, level|
-            expected_hash[level_name.to_s] = level.count
-          end
-
-          request.response_header.status.should == 200
-          found = Yajl::Parser.parse(request.response)["log_counts"]
-          expect(found).to eq expected_hash
           done
         end
       end
