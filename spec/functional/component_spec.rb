@@ -6,7 +6,10 @@ require "em-http/version"
 describe VCAP::Component do
   include VCAP::Spec::EM
 
-  let(:nats) { NATS.connect(:uri => "nats://localhost:4223", :autostart => true) }
+  let(:nats) do
+    NATS.connect(:uri => "nats://localhost:4223", :autostart => true)
+  end
+
   let(:default_options) { { :type => "type", :nats => nats } }
 
   after :all do
@@ -65,7 +68,7 @@ describe VCAP::Component do
       end
 
       em do
-        VCAP::Component.register({})
+        VCAP::Component.register(:nats => nats)
         done
       end
     end
