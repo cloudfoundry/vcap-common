@@ -164,6 +164,7 @@ module VCAP
         nats = opts[:nats] || NATS
         auth = [opts[:user] || VCAP.secure_uuid, opts[:password] || VCAP.secure_uuid]
         logger = opts[:logger] || Logger.new(nil)
+        log_counter = opts[:log_counter]
 
         # Discover message limited
         @discover = {
@@ -180,6 +181,7 @@ module VCAP
           varz.merge!(@discover.dup)
           varz[:num_cores] = VCAP.num_cores
           varz[:config] = sanitize_config(opts[:config]) if opts[:config]
+          varz[:log_counter] = log_counter if log_counter
         end
 
         @healthz = "ok\n".freeze

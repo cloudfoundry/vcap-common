@@ -5,6 +5,14 @@ require "spec_helper"
 require "vcap/component"
 
 describe VCAP::Component do
+
+  let(:nats) do
+    nats_mock = mock("nats")
+    nats_mock.stub(:subscribe)
+    nats_mock.stub(:publish)
+    nats_mock
+  end
+
   def cleanup
     VCAP::Component.instance_eval do
       if instance_variables.include?(:@varz)
@@ -50,6 +58,18 @@ describe VCAP::Component do
           VCAP::Component.varz[:foo]
         end.to_not raise_error
       end
+    end
+  end
+
+  describe "register" do
+    it "adds log_counter to varz when passed as an option" do
+      EventMachine.stub(:reactor_running?).and_return(true)
+      VCAP::Component.stub(:start_http_server)
+
+      foo = Object.new
+      options = { :log_counter => foo, :nats => nats }
+      VCAP::Component.register(options)
+      expect(VCAP::Component.varz[:log_counter]).to eq foo
     end
   end
 end
