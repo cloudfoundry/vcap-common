@@ -154,6 +154,12 @@ describe JsonMessage do
       msg = @klass.new
       msg.optional.should == nil
     end
+
+    it 'should set the default value for a required field with false default value' do
+      @klass.optional :enabled, -> { bool }, false
+      msg = @klass.new
+      msg.enabled.should == false
+    end
   end
 
   describe '#encode' do

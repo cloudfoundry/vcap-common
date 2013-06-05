@@ -185,7 +185,7 @@ class JsonMessage
     unless @msg.has_key?(name)
       field = self.class.fields[name]
       if field
-        @msg[name] = field.default if field.default
+        @msg[name] = field.default unless field.default.nil?
       end
     end
   end
