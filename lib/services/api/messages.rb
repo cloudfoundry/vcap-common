@@ -94,7 +94,7 @@ module VCAP
       class GatewayProvisionRequest < JsonMessage
         required :unique_id, String
         required :name,      String
-        required :email,     String
+        optional :email,     String
 
         optional :organization_guid, String
         optional :space_guid,        String
