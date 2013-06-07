@@ -181,7 +181,7 @@ module VCAP
           varz.merge!(@discover.dup)
           varz[:num_cores] = VCAP.num_cores
           varz[:config] = sanitize_config(opts[:config]) if opts[:config]
-          varz[:log_counter] = log_counter if log_counter
+          varz[:log_counts] = log_counter if log_counter
         end
 
         @healthz = "ok\n".freeze

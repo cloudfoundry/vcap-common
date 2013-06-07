@@ -69,7 +69,7 @@ describe VCAP::Component do
       foo = Object.new
       options = { :log_counter => foo, :nats => nats }
       VCAP::Component.register(options)
-      expect(VCAP::Component.varz[:log_counter]).to eq foo
+      expect(VCAP::Component.varz[:log_counts]).to eq foo
     end
   end
 end
