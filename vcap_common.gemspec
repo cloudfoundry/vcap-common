@@ -1,9 +1,9 @@
 spec = Gem::Specification.new do |s|
   s.name = 'vcap_common'
-  s.version = '2.0.11'
-  s.date = '2012-10-25'
+  s.version = '2.1.0'
+  s.date = '2013-06-08'
   s.summary = 'vcap common'
-  s.homepage = "http://github.com/vmware-ac/core"
+  s.homepage = "http://github.com/cloudfoundry/vcap-common"
   s.description = 'common vcap classes/methods'
 
   s.authors = ["Derek Collison"]
