@@ -2,9 +2,14 @@
 require "spec_helper"
 require "vcap/spec/em"
 require "em-http/version"
+require 'webmock'
 
 describe VCAP::Component do
   include VCAP::Spec::EM
+
+  before :each do
+    WebMock.allow_net_connect!
+  end
 
   let(:nats) do
     NATS.connect(:uri => "nats://localhost:4223", :autostart => true)
