@@ -1,6 +1,6 @@
 # Copyright (c) 2009-2012 VMware, Inc.
 require 'spec_helper'
-require 'webmock'
+require 'webmock/rspec'
 
 module VCAP::Services::Api
   class ServiceGatewayClient
@@ -81,6 +81,46 @@ describe VCAP::Services::Api::ServiceGatewayClient do
       expect {
         client.perform_request(http_method, path)
       }.to raise_error(VCAP::Services::Api::ServiceGatewayClient::UnexpectedResponse)
+    end
+  end
+
+  describe '#unprovision' do
+    let(:gateway_url) { "http://gateway.example.com" }
+    let(:token) { "mytoken" }
+    let(:timeout) { 10 }
+    let(:service_id) { 'service-instance-8272' }
+    let(:service_url) { "#{gateway_url}/gateway/v1/configurations/#{service_id}" }
+    let(:gateway_response_body) do
+      {
+        "description" => '',
+        "code" => 999,
+      }.to_json
+    end
+
+    subject(:client) do
+      VCAP::Services::Api::ServiceGatewayClient.new(gateway_url, token, timeout)
+    end
+
+    context 'when the getway returns 422' do
+      let(:status){ 422 }
+
+      it 'should raise an GatewayExternalError' do
+        stub_request(:delete, service_url).to_return(status:status, body: gateway_response_body)
+        expect do
+          client.unprovision({service_id: service_id})
+        end.to raise_error(described_class::GatewayExternalError)
+      end
+    end
+
+    context 'when the gateway returns 404' do
+      let(:status){ 404 }
+
+      it 'should raise an NotFoundResponse' do
+        stub_request(:delete, service_url).to_return(status: status, body: gateway_response_body)
+        expect do
+          client.unprovision({service_id: service_id})
+        end.to raise_error(described_class::NotFoundResponse)
+      end
     end
   end
 end

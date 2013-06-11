@@ -45,6 +45,12 @@ module VCAP::Services::Api
       end
     end
 
+    class GatewayExternalError < ErrorResponse
+      def initialize(error)
+        super(422, error)
+      end
+    end
+
     class NotFoundResponse < ErrorResponse
       def initialize(error)
         super(404, error)
@@ -167,6 +173,9 @@ module VCAP::Services::Api
       when 404
         err = ServiceErrorResponse.decode(body)
         raise NotFoundResponse.new(err)
+      when 422
+        err = ServiceErrorResponse.decode(body)
+        raise GatewayExternalError.new(err)
       when 503
         err = ServiceErrorResponse.decode(body)
         raise GatewayInternalResponse.new(err)
