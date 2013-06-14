@@ -96,6 +96,10 @@ module VCAP
         required :name,      String
         optional :email,     String
 
+        optional :provider,          String
+        optional :label,             String
+        optional :plan,              String
+        optional :version,           String
         optional :organization_guid, String
         optional :space_guid,        String
         optional :plan_option
