@@ -17,7 +17,7 @@ module VCAP
   end
 
   def self.secure_uuid
-    result = File.open('/dev/urandom') { |x| x.read(16).unpack('H*')[0] }
+    File.open('/dev/urandom') { |x| x.read(16).unpack('H*')[0] }
   end
 
   def self.grab_ephemeral_port

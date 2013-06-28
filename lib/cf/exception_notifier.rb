@@ -1,4 +1,5 @@
 require "squash/ruby"
+
 module Cf
   class ExceptionNotifier
     class << self
