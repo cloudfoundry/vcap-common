@@ -16,9 +16,17 @@ module Cf
       }
     end
 
+    let(:registry_message) do
+      {
+        host: config[:host],
+        port: config[:port],
+        uris: Array(config[:uri]),
+        tags: config[:tags]
+      }
+    end
+
     before do
       EM.stub(:cancel_timer)
-      Config.stub(:logger).and_return(logger)
       CfMessageBus::MessageBus.stub(:new) { message_bus }
     end
 
@@ -67,15 +75,6 @@ module Cf
     end
 
     describe "#register_with_router" do
-      let(:registration_message) do
-        {
-          host: config[:host],
-          port: config[:port],
-          uris: Array(config[:uri]),
-          tags: config[:tags]
-        }
-      end
-
       it "creates the message bus correctly with logger" do
         CfMessageBus::MessageBus.should_receive(:new).with(uri: bus_uri, logger: subject.logger)
         subject.register_with_router
@@ -83,7 +82,7 @@ module Cf
 
       it "registers routes immediately" do
         subject.register_with_router
-        expect(message_bus).to have_published_with_message("router.register", registration_message)
+        expect(message_bus).to have_published_with_message("router.register", registry_message)
       end
 
       it "registers upon a router.start message" do
@@ -93,9 +92,9 @@ module Cf
 
         message_bus.clear_published_messages
 
-        message_bus.publish("router.start", {minimumRegisterIntervalInSeconds: 33})
+        message_bus.publish("router.start", minimumRegisterIntervalInSeconds: 33)
 
-        expect(message_bus).to have_published_with_message("router.register", registration_message)
+        expect(message_bus).to have_published_with_message("router.register", registry_message)
       end
 
       it "greets the router" do
@@ -105,24 +104,24 @@ module Cf
 
         message_bus.clear_published_messages
 
-        message_bus.respond_to_request("router.greet", {minimumRegisterIntervalInSeconds: 33})
+        message_bus.respond_to_request("router.greet", minimumRegisterIntervalInSeconds: 33)
       end
 
       it "periodically registers with the router" do
         EM.should_receive(:add_periodic_timer).with(33).and_return(:periodic_timer)
         subject.register_with_router
-        message_bus.publish("router.start", {minimumRegisterIntervalInSeconds: 33})
+        message_bus.publish("router.start", minimumRegisterIntervalInSeconds: 33)
       end
 
       it "clears an existing timer when registering a new one" do
         subject.register_with_router
 
         EM.should_receive(:add_periodic_timer).with(33).and_return(:periodic_timer)
-        message_bus.publish("router.start", {minimumRegisterIntervalInSeconds: 33})
+        message_bus.publish("router.start", minimumRegisterIntervalInSeconds: 33)
 
         EM.should_receive(:cancel_timer).with(:periodic_timer)
         EM.should_receive(:add_periodic_timer).with(24)
-        message_bus.publish("router.start", {minimumRegisterIntervalInSeconds: 24})
+        message_bus.publish("router.start", minimumRegisterIntervalInSeconds: 24)
       end
 
       context "when there is no timer interval returned" do
@@ -132,6 +131,17 @@ module Cf
           EM.should_not_receive(:add_periodic_timer)
           message_bus.publish("router.start", {})
         end
+      end
+    end
+
+    describe "#shutdown" do
+      it "publishes router.unregister" do
+        subject.shutdown
+        expect(message_bus).to have_published_with_message("router.unregister", registry_message)
+      end
+
+      it "calls the given block after sending" do
+        expect { |b| subject.shutdown(&b) }.to yield_control
       end
     end
   end

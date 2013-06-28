@@ -71,11 +71,11 @@ module Cf
       send_registration_message
     end
 
-    private
-
     def shutdown(&block)
       send_unregistration_message(&block)
     end
+
+    private
 
     def handle_router_greeting(message)
       send_registration_message
