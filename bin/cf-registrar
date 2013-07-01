@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+require "rubygems"
+require "yaml"
+
+require "cf/registrar"
+require "steno"
+
+if ARGV.empty?
+  puts "Usage: cf-registrar --<mode1> --<mode2> ...\n\nModes can be --register-with-router and --register-varz-credentials"
+  exit
+end
+
+config_file = ENV["CONFIG_FILE"] || File.expand_path("../config/registrar.example.yml", File.dirname(__FILE__))
+config = YAML.load_file(config_file)
+
+Steno.init(Steno::Config.from_hash(config["logging"]))
+logger = Steno.logger("cf-registrar")
+
+unless config["varz"]["file"].nil?
+  varz_config = YAML.load_file(config["varz"]["file"])
+  unless varz_config.nil?
+    logger.info "Reading varz config from #{config["varz"]["file"]}"
+    config["varz"] = varz_config["varz"]
+  end
+end
+
+logger.debug("Config #{config.inspect}")
+
+EM.run do
+  cf_registrar = Cf::Registrar.new(config)
+  if ARGV.include? "--register-with-router"
+    cf_registrar.register_with_router
+  end
+
+  if ARGV.include? "--register-varz-credentials"
+    cf_registrar.register_varz_credentials
+  end
+
+  %w[TERM INT QUIT].each do |signal|
+    trap signal do
+      logger.info("Shutting down")
+      if ARGV.include? "--register-with-router"
+        cf_registrar.shutdown { exit }
+      else
+        exit
+      end
+    end
+  end
+end
