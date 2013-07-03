@@ -28,11 +28,11 @@ logger.debug("Config #{config.inspect}")
 
 EM.run do
   cf_registrar = Cf::Registrar.new(config)
-  if ARGV.include? "--register-with-router"
+  if ARGV.include?("--register-with-router") || ARGV.include?("--register_with_router")
     cf_registrar.register_with_router
   end
 
-  if ARGV.include? "--register-varz-credentials"
+  if ARGV.include?("--register-varz-credentials") || ARGV.include?("--register_varz_credentials")
     cf_registrar.register_varz_credentials
   end
 
