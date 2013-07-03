@@ -27,7 +27,15 @@ end
 logger.debug("Config #{config.inspect}")
 
 EM.run do
-  cf_registrar = Cf::Registrar.new(config)
+  cf_registrar = Cf::Registrar.new({
+    :mbus => config["mbus"],
+    :host => config["host"],
+    :port => config["port"],
+    :uri => config["uri"],
+    :tags => config["tags"],
+    :index => config["index"],
+    :varz => config["varz"],
+  })
   if ARGV.include?("--register-with-router") || ARGV.include?("--register_with_router")
     cf_registrar.register_with_router
   end
