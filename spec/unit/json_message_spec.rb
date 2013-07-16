@@ -118,13 +118,14 @@ describe JsonMessage do
       @klass = Class.new(JsonMessage)
     end
 
-    it 'should raise an error when undefined field is used' do
+    it 'does not raise an exception when an unknown field is given' do
       expect {
-        @klass.new({"undefined" => "undefined"})
-      }.to raise_error { |error|
-        error.should be_an_instance_of(JsonMessage::ValidationError)
-        error.message.size.should > 0
-      }
+        @klass.new({"unknown" => "unknown"})
+      }.not_to raise_error
+    end
+
+    it 'does not add unknown fields to the result' do
+      @klass.new({"unknown" => "unknown"}).should_not respond_to(:unknown)
     end
 
     expected = 'should set default value for optional field which is'

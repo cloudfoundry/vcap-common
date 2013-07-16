@@ -167,9 +167,7 @@ class JsonMessage
     name = name.to_sym
     field = self.class.fields[name]
 
-    unless field
-      raise ValidationError.new( { name => "Unknown field: #{name}" } )
-    end
+    return unless field
 
     field.validate(value)
     @msg[name] = value
