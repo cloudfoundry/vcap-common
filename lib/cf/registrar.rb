@@ -13,7 +13,7 @@ module Cf
     ROUTER_UNREGISTER_TOPIC = "router.unregister"
 
     attr_reader :logger, :message_bus_uri, :type, :host, :port,
-                :username, :password, :uri, :tags, :uuid, :index
+                :username, :password, :uri, :tags, :uuid, :index, :private_instance_id
 
     def initialize(config)
       @logger = Steno.logger("cf.registrar")
@@ -24,6 +24,7 @@ module Cf
       @uri = config[:uri]
       @tags = config[:tags]
       @index = config[:index] || 0
+      @private_instance_id = config[:private_instance_id]
 
       if config[:varz]
         @type = config[:varz][:type]
@@ -106,7 +107,9 @@ module Cf
         :host => host,
         :port => port,
         :uris => Array(uri),
-        :tags => tags
+        :tags => tags,
+        :index => index,
+        :private_instance_id => private_instance_id
       }
     end
 

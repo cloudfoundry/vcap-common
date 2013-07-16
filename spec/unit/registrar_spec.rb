@@ -12,6 +12,8 @@ module Cf
         port: 98765,
         uri: "fancyuri",
         tags: "taggy goodness",
+        private_instance_id: "monkey-id",
+        index: "indextastic",
         varz: {}
       }
     end
@@ -21,7 +23,9 @@ module Cf
         host: config[:host],
         port: config[:port],
         uris: Array(config[:uri]),
-        tags: config[:tags]
+        tags: config[:tags],
+        index: "indextastic",
+        private_instance_id: "monkey-id"
       }
     end
 
@@ -33,7 +37,7 @@ module Cf
     subject { described_class.new(config) }
 
     describe ".new" do
-      let(:config) { { mbus: "m", host: "h", port: "p", uri: "u", tags: "t", index: 1 } }
+      let(:config) { { mbus: "m", host: "h", port: "p", uri: "u", tags: "t", index: 1, private_instance_id: "monkey" } }
 
       its(:logger) { should be_a Steno::Logger }
       its(:message_bus_uri) { should eq "m" }
@@ -42,6 +46,7 @@ module Cf
       its(:uri) { should eq "u" }
       its(:tags) { should eq "t" }
       its(:index) { should eq 1 }
+      its(:private_instance_id) { should eq "monkey" }
 
       context "when the index is not provided" do
         let(:config) { { mbus: "m", host: "h", port: "p", uri: "u", tags: "t" } }

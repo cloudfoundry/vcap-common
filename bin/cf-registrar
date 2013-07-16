@@ -4,6 +4,7 @@ require "yaml"
 
 require "cf/registrar"
 require "steno"
+require "securerandom"
 
 if ARGV.empty?
   puts "Usage: cf-registrar --<mode1> --<mode2> ...\n\nModes can be --register-with-router and --register-varz-credentials"
@@ -35,6 +36,7 @@ EM.run do
     :tags => config["tags"],
     :index => config["index"],
     :varz => config["varz"],
+    :private_instance_id => SecureRandom.uuid
   })
   if ARGV.include?("--register-with-router") || ARGV.include?("--register_with_router")
     cf_registrar.register_with_router
