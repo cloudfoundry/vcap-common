@@ -40,6 +40,13 @@ module VCAP
     "#{days}d:#{hours}h:#{minutes}m:#{num_seconds}s"
   end
 
+  def self.uptime_string_to_seconds(string)
+    parts = string.split(":", 4).map { |i| i.to_i}
+    raise ArgumentError.new("Invalid format") unless parts.size == 4
+    days, hours, mins, secs = parts
+    secs + (mins * 60) + (hours * 3600) + (days * 24 * 3600)
+  end
+
   def self.num_cores
     if RUBY_PLATFORM =~ /linux/
       return `cat /proc/cpuinfo | grep processor | wc -l`.to_i
