@@ -17,7 +17,7 @@ GIT
 PATH
   remote: .
   specs:
-    vcap_common (2.2.0)
+    vcap_common (2.2.1)
       addressable (~> 2.2)
       em-http-request (~> 1.0)
       eventmachine
