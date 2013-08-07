@@ -155,7 +155,8 @@ module VCAP::Services::Api
         @token = token
         @headers  = {
           'Content-Type' => 'application/json',
-          GATEWAY_TOKEN_HEADER => token
+          GATEWAY_TOKEN_HEADER => token,
+          VCAP::Request::HEADER_NAME => VCAP::Request.current_id
         }
       end
 

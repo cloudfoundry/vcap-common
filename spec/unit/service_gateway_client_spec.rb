@@ -1,6 +1,7 @@
 # Copyright (c) 2009-2012 VMware, Inc.
 require 'spec_helper'
 require 'webmock/rspec'
+require 'vcap/request'
 
 module VCAP::Services::Api
   describe ServiceGatewayClient do
@@ -85,6 +86,10 @@ module VCAP::Services::Api
   end
 
   describe ServiceGatewayClient::HttpClient do
+    before do
+      VCAP::Request.current_id = SecureRandom.uuid
+    end
+
     describe '#perform_request' do
       let(:url) { 'http://localhost' }
       let(:token) { 'mytoken' }
@@ -93,7 +98,12 @@ module VCAP::Services::Api
       let(:http_client) { described_class.new(url, token, timeout) }
 
       it 'makes GET requests' do
-        request = stub_request(:get, 'http://localhost/path1').to_return(status: 200, body: 'data')
+        request = stub_request(:get, 'http://localhost/path1').
+          with(headers: {
+            VCAP::Request::HEADER_NAME => VCAP::Request.current_id,
+            VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
+          }).
+          to_return(status: 200, body: 'data')
 
         result = http_client.perform_request(:get, '/path1')
         result.should == 'data'
@@ -102,7 +112,12 @@ module VCAP::Services::Api
       end
 
       it 'makes POST requests' do
-        request = stub_request(:post, 'http://localhost/path1').to_return(status: 200, body: 'data')
+        request = stub_request(:post, 'http://localhost/path1').
+          with(headers: {
+            VCAP::Request::HEADER_NAME => VCAP::Request.current_id,
+            VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
+          }).
+          to_return(status: 200, body: 'data')
 
         result = http_client.perform_request(:post, '/path1')
         result.should == 'data'
@@ -111,7 +126,12 @@ module VCAP::Services::Api
       end
 
       it 'makes PUT requests' do
-        request = stub_request(:put, 'http://localhost/path1').to_return(status: 200, body: 'data')
+        request = stub_request(:put, 'http://localhost/path1').
+          with(headers: {
+            VCAP::Request::HEADER_NAME => VCAP::Request.current_id,
+            VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
+          }).
+          to_return(status: 200, body: 'data')
 
         result = http_client.perform_request(:put, '/path1')
         result.should == 'data'
@@ -120,7 +140,12 @@ module VCAP::Services::Api
       end
 
       it 'makes DELETE requests' do
-        request = stub_request(:delete, 'http://localhost/path1').to_return(status: 200, body: 'data')
+        request = stub_request(:delete, 'http://localhost/path1').
+          with(headers: {
+            VCAP::Request::HEADER_NAME => VCAP::Request.current_id,
+            VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
+          }).
+          to_return(status: 200, body: 'data')
 
         result = http_client.perform_request(:delete, '/path1')
         result.should == 'data'
