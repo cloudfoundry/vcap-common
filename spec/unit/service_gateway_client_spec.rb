@@ -15,24 +15,8 @@ describe VCAP::Services::Api::ServiceGatewayClient do
       @timeout = 10
     end
 
-    it "should use async http client when EM is running" do
+    it "should use net/http client" do
       client = VCAP::Services::Api::ServiceGatewayClient.new(@url, @token, @timeout)
-      EM.should_receive(:reactor_running?).and_return true
-
-      path = "/path1"
-      message = "data"
-
-      http_method = :get
-
-      VCAP::Services::Api::AsyncHttpRequest.should_receive(:request).with(anything, @token, http_method, @timeout, anything).and_return [200, message]
-
-      result = client.perform_request(http_method, path)
-      result.should == message
-    end
-
-    it "should use net/http client when EM is not running" do
-      client = VCAP::Services::Api::ServiceGatewayClient.new(@url, @token, @timeout)
-      EM.should_receive(:reactor_running?).and_return nil
 
       path = "/path1"
       resp = mock("resq")
@@ -49,10 +33,8 @@ describe VCAP::Services::Api::ServiceGatewayClient do
       result.should == message
     end
 
-
     it "should should raise error with none 200 response" do
       client = VCAP::Services::Api::ServiceGatewayClient.new(@url, @token, @timeout)
-      EM.should_receive(:reactor_running?).any_number_of_times.and_return nil
 
       path = "/path1"
       resp = mock("resq")

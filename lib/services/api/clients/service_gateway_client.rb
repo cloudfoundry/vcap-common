@@ -64,7 +64,7 @@ module VCAP::Services::Api
     end
 
     attr_reader :host, :port, :token
-    attr_reader :requester
+
     def initialize(url, token, timeout, opts={})
       @url = url
       @timeout = timeout
@@ -73,9 +73,6 @@ module VCAP::Services::Api
         'Content-Type' => 'application/json',
         GATEWAY_TOKEN_HEADER => @token
       }
-      # contract: @requester.responds_to? :request(url, token, timeout, [msg])
-      # contract @requester.request(url, token, timeout, [msg]) => [code, body]
-      @requester = opts[:requester] || AsyncHttpRequest
     end
 
     def provision(args)
@@ -154,19 +151,14 @@ module VCAP::Services::Api
     protected
 
     def perform_request(http_method, path, msg=VCAP::Services::Api::EMPTY_REQUEST)
-      result = nil
       uri = URI.parse(@url)
-      if EM.reactor_running?
-        url = URI.parse(uri.to_s + path)
-        code, body = requester.request(url, @token, http_method, @timeout, msg)
-      else
-        klass = METHODS_MAP[http_method]
-        req = klass.new(path, initheader=@hdrs)
-        req.body = msg.encode
-        resp = Net::HTTP.new(uri.host, uri.port).start {|http| http.request(req)}
-        code = resp.code.to_i
-        body = resp.body
-      end
+      klass = METHODS_MAP[http_method]
+      req = klass.new(path, initheader=@hdrs)
+      req.body = msg.encode
+      resp = Net::HTTP.new(uri.host, uri.port).start {|http| http.request(req)}
+      code = resp.code.to_i
+      body = resp.body
+
       case code
       when 200
         body
