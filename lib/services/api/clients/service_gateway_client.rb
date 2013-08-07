@@ -15,13 +15,6 @@ end
 
 module VCAP::Services::Api
   class ServiceGatewayClient
-    METHODS_MAP = {
-      :get => Net::HTTP::Get,
-      :post=> Net::HTTP::Post,
-      :put => Net::HTTP::Put,
-      :delete => Net::HTTP::Delete,
-    }
-
     # Public: Indicate gateway client encounter an unexpected error,
     # such as can't connect to gateway or can't decode response.
     #
@@ -63,122 +56,135 @@ module VCAP::Services::Api
       end
     end
 
-    attr_reader :host, :port, :token
+    attr_reader :http_client
 
     def initialize(url, token, timeout, opts={})
-      @url = url
-      @timeout = timeout
-      @token = token
-      @hdrs  = {
-        'Content-Type' => 'application/json',
-        GATEWAY_TOKEN_HEADER => @token
-      }
+      @http_client = HttpClient.new(url, token, timeout)
     end
 
     def provision(args)
       msg = GatewayProvisionRequest.new(args)
-      resp = perform_request(:post, '/gateway/v1/configurations', msg)
+      resp = http_client.perform_request(:post, '/gateway/v1/configurations', msg)
       GatewayHandleResponse.decode(resp)
     end
 
     def unprovision(args)
-      resp = perform_request(:delete, "/gateway/v1/configurations/#{args[:service_id]}")
+      http_client.perform_request(:delete, "/gateway/v1/configurations/#{args[:service_id]}")
       EMPTY_REQUEST
-    end
-
-    def create_snapshot(args)
-      resp = perform_request(:post, "/gateway/v1/configurations/#{args[:service_id]}/snapshots")
-      Job.decode(resp)
-    end
-
-    def enum_snapshots(args)
-      resp = perform_request(:get, "/gateway/v1/configurations/#{args[:service_id]}/snapshots")
-      SnapshotList.decode(resp)
-    end
-
-    def snapshot_details(args)
-      resp = perform_request(:get, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}")
-      Snapshot.decode(resp)
-    end
-
-    def update_snapshot_name(args)
-      perform_request(:post, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}/name", args[:msg])
-      EMPTY_REQUEST
-    end
-
-    def rollback_snapshot(args)
-      resp = perform_request(:put, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}")
-      Job.decode(resp)
-    end
-
-    def delete_snapshot(args)
-      resp = perform_request(:delete, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}")
-      Job.decode(resp)
-    end
-
-    def create_serialized_url(args)
-      resp = perform_request(:post, "/gateway/v1/configurations/#{args[:service_id]}/serialized/url/snapshots/#{args[:snapshot_id]}")
-      Job.decode(resp)
-    end
-
-    def serialized_url(args)
-      resp = perform_request(:get, "/gateway/v1/configurations/#{args[:service_id]}/serialized/url/snapshots/#{args[:snapshot_id]}")
-      SerializedURL.decode(resp)
-    end
-
-    def import_from_url(args)
-      resp = perform_request(:put, "/gateway/v1/configurations/#{args[:service_id]}/serialized/url", args[:msg])
-      Job.decode(resp)
-    end
-
-    def job_info(args)
-      resp = perform_request(:get, "/gateway/v1/configurations/#{args[:service_id]}/jobs/#{args[:job_id]}")
-      Job.decode(resp)
     end
 
     def bind(args)
       msg = GatewayBindRequest.new(args)
-      resp = perform_request(:post, "/gateway/v1/configurations/#{msg.service_id}/handles", msg)
+      resp = http_client.perform_request(:post, "/gateway/v1/configurations/#{msg.service_id}/handles", msg)
       GatewayHandleResponse.decode(resp)
     end
 
     def unbind(args)
       msg = GatewayUnbindRequest.new(args)
-      perform_request(:delete, "/gateway/v1/configurations/#{msg.service_id}/handles/#{msg.handle_id}", msg)
+      http_client.perform_request(:delete, "/gateway/v1/configurations/#{msg.service_id}/handles/#{msg.handle_id}", msg)
       EMPTY_REQUEST
     end
 
-    protected
+    #------------------
+    # Snapshotting has never been enabled in production - we can probably remove these
+    #------------------
 
-    def perform_request(http_method, path, msg=VCAP::Services::Api::EMPTY_REQUEST)
-      uri = URI.parse(@url)
-      klass = METHODS_MAP[http_method]
-      req = klass.new(path, initheader=@hdrs)
-      req.body = msg.encode
-      resp = Net::HTTP.new(uri.host, uri.port).start {|http| http.request(req)}
-      code = resp.code.to_i
-      body = resp.body
+    def job_info(args)
+      resp = http_client.perform_request(:get, "/gateway/v1/configurations/#{args[:service_id]}/jobs/#{args[:job_id]}")
+      Job.decode(resp)
+    end
 
-      case code
-      when 200
-        body
-      when 404
-        err = ServiceErrorResponse.decode(body)
-        raise NotFoundResponse.new(err)
-      when 422
-        err = ServiceErrorResponse.decode(body)
-        raise GatewayExternalError.new(err)
-      when 503
-        err = ServiceErrorResponse.decode(body)
-        raise GatewayInternalResponse.new(err)
-      else
-        begin
-          # try to decode the response
-          err = ServiceErrorResponse.decode(body)
-        rescue => e
-          raise UnexpectedResponse, "Can't decode gateway response. status code:#{code}, response body:#{body}"
+    def create_snapshot(args)
+      resp = http_client.perform_request(:post, "/gateway/v1/configurations/#{args[:service_id]}/snapshots")
+      Job.decode(resp)
+    end
+
+    def enum_snapshots(args)
+      resp = http_client.perform_request(:get, "/gateway/v1/configurations/#{args[:service_id]}/snapshots")
+      SnapshotList.decode(resp)
+    end
+
+    def snapshot_details(args)
+      resp = http_client.perform_request(:get, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}")
+      Snapshot.decode(resp)
+    end
+
+    def update_snapshot_name(args)
+      http_client.perform_request(:post, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}/name", args[:msg])
+      EMPTY_REQUEST
+    end
+
+    def rollback_snapshot(args)
+      resp = http_client.perform_request(:put, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}")
+      Job.decode(resp)
+    end
+
+    def delete_snapshot(args)
+      resp = http_client.perform_request(:delete, "/gateway/v1/configurations/#{args[:service_id]}/snapshots/#{args[:snapshot_id]}")
+      Job.decode(resp)
+    end
+
+    def create_serialized_url(args)
+      resp = http_client.perform_request(:post, "/gateway/v1/configurations/#{args[:service_id]}/serialized/url/snapshots/#{args[:snapshot_id]}")
+      Job.decode(resp)
+    end
+
+    def serialized_url(args)
+      resp = http_client.perform_request(:get, "/gateway/v1/configurations/#{args[:service_id]}/serialized/url/snapshots/#{args[:snapshot_id]}")
+      SerializedURL.decode(resp)
+    end
+
+    def import_from_url(args)
+      resp = http_client.perform_request(:put, "/gateway/v1/configurations/#{args[:service_id]}/serialized/url", args[:msg])
+      Job.decode(resp)
+    end
+
+    class HttpClient
+      METHODS_MAP = {
+        get: Net::HTTP::Get,
+        post: Net::HTTP::Post,
+        put: Net::HTTP::Put,
+        delete: Net::HTTP::Delete,
+      }
+
+      attr_reader :uri, :timeout, :token, :headers
+
+      def initialize(uri, token, timeout)
+        @uri = URI.parse(uri)
+        @timeout = timeout
+        @token = token
+        @headers  = {
+          'Content-Type' => 'application/json',
+          GATEWAY_TOKEN_HEADER => token
+        }
+      end
+
+      def perform_request(http_method, path, msg = EMPTY_REQUEST)
+        klass = METHODS_MAP[http_method]
+        request = klass.new(path, headers)
+        request.body = msg.encode
+
+        response = Net::HTTP.new(uri.host, uri.port).start do |http|
+          http.request(request)
         end
-        raise ErrorResponse.new(code, err)
+
+        code = response.code.to_i
+        body = response.body
+
+        return body if code == 200
+
+        begin
+          err = ServiceErrorResponse.decode(body)
+        rescue JsonMessage::Error
+          raise UnexpectedResponse, "Can't decode gateway response. status code: #{code}, response body: #{body}"
+        end
+
+        case code
+        when 404 then raise NotFoundResponse.new(err)
+        when 422 then raise GatewayExternalError.new(err)
+        when 503 then raise GatewayInternalResponse.new(err)
+        else raise ErrorResponse.new(code, err)
+        end
       end
     end
   end
