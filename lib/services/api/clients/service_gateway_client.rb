@@ -58,8 +58,8 @@ module VCAP::Services::Api
 
     attr_reader :http_client
 
-    def initialize(url, token, timeout, opts={})
-      @http_client = HttpClient.new(url, token, timeout)
+    def initialize(url, token, timeout, request_id)
+      @http_client = HttpClient.new(url, token, timeout, request_id)
     end
 
     def provision(args)
@@ -149,14 +149,14 @@ module VCAP::Services::Api
 
       attr_reader :uri, :timeout, :token, :headers
 
-      def initialize(uri, token, timeout)
+      def initialize(uri, token, timeout, request_id)
         @uri = URI.parse(uri)
         @timeout = timeout
         @token = token
         @headers  = {
           'Content-Type' => 'application/json',
           GATEWAY_TOKEN_HEADER => token,
-          VCAP::Request::HEADER_NAME => VCAP::Request.current_id
+          "X-VCAP-Request-ID" => request_id.to_s
         }
       end
 

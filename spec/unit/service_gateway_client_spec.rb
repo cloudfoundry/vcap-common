@@ -1,18 +1,18 @@
 # Copyright (c) 2009-2012 VMware, Inc.
 require 'spec_helper'
 require 'webmock/rspec'
-require 'vcap/request'
 
 module VCAP::Services::Api
   describe ServiceGatewayClient do
     let(:gateway_url) { 'http://gateway.example.com' }
     let(:token) { 'mytoken' }
     let(:timeout) { 10 }
+    let(:request_id) { SecureRandom.uuid }
 
     let(:http_client) { double(:http_client) }
 
     subject(:client) do
-      ServiceGatewayClient.new(gateway_url, token, timeout)
+      ServiceGatewayClient.new(gateway_url, token, timeout, request_id)
     end
 
     before do
@@ -22,10 +22,10 @@ module VCAP::Services::Api
     describe '#initialize' do
       it 'properly instantiates the http client' do
         ServiceGatewayClient::HttpClient.should_receive(:new).
-          with(gateway_url, token, timeout).
+          with(gateway_url, token, timeout, request_id).
           and_return(http_client)
 
-        ServiceGatewayClient.new(gateway_url, token, timeout)
+        ServiceGatewayClient.new(gateway_url, token, timeout, request_id)
       end
     end
 
@@ -86,21 +86,18 @@ module VCAP::Services::Api
   end
 
   describe ServiceGatewayClient::HttpClient do
-    before do
-      VCAP::Request.current_id = SecureRandom.uuid
-    end
-
     describe '#perform_request' do
       let(:url) { 'http://localhost' }
       let(:token) { 'mytoken' }
       let(:timeout) { 10 }
+      let(:request_id) { "request-id-beef" }
 
-      let(:http_client) { described_class.new(url, token, timeout) }
+      let(:http_client) { described_class.new(url, token, timeout, request_id) }
 
       it 'makes GET requests' do
         request = stub_request(:get, 'http://localhost/path1').
           with(headers: {
-            VCAP::Request::HEADER_NAME => VCAP::Request.current_id,
+            "X-VCAP-Request-ID" => request_id,
             VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
           }).
           to_return(status: 200, body: 'data')
@@ -111,10 +108,27 @@ module VCAP::Services::Api
         request.should have_been_made
       end
 
+      context "when request_id is nil" do
+        it "makes POST requests without the X-VCAP-Request-ID header" do
+          client = described_class.new(url, token, timeout, nil)
+
+          request = stub_request(:post, 'http://localhost/path1').
+            with(headers: {
+              VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
+            }).
+            to_return(status: 200, body: 'data')
+
+          result = client.perform_request(:post, '/path1')
+          result.should == 'data'
+
+          request.should have_been_made
+        end
+      end
+
       it 'makes POST requests' do
         request = stub_request(:post, 'http://localhost/path1').
           with(headers: {
-            VCAP::Request::HEADER_NAME => VCAP::Request.current_id,
+            "X-VCAP-Request-ID" => "request-id-beef",
             VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
           }).
           to_return(status: 200, body: 'data')
@@ -128,7 +142,7 @@ module VCAP::Services::Api
       it 'makes PUT requests' do
         request = stub_request(:put, 'http://localhost/path1').
           with(headers: {
-            VCAP::Request::HEADER_NAME => VCAP::Request.current_id,
+            "X-VCAP-Request-ID" => "request-id-beef",
             VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
           }).
           to_return(status: 200, body: 'data')
@@ -142,7 +156,7 @@ module VCAP::Services::Api
       it 'makes DELETE requests' do
         request = stub_request(:delete, 'http://localhost/path1').
           with(headers: {
-            VCAP::Request::HEADER_NAME => VCAP::Request.current_id,
+            "X-VCAP-Request-ID" => "request-id-beef",
             VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token,
           }).
           to_return(status: 200, body: 'data')
