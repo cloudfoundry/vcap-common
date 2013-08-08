@@ -8,8 +8,7 @@ module VCAP
       end
 
       def current_id
-        Thread.current[:vcap_request_id] or
-          raise 'No request id is set'
+        Thread.current[:vcap_request_id]
       end
     end
   end

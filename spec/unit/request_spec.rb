@@ -22,10 +22,8 @@ module VCAP
       end
 
       context "when it hasn't been set" do
-        it 'raises an exception' do
-          expect {
-            described_class.current_id
-          }.to raise_error('No request id is set')
+        it 'returns nil' do
+          described_class.current_id.should be_nil
         end
       end
     end
