@@ -226,7 +226,6 @@ module VCAP::Services::Api
       end
 
       it_raises_an_exception_when(response_status: 404, exception: ServiceGatewayClient::NotFoundResponse)
-      it_raises_an_exception_when(response_status: 422, exception: ServiceGatewayClient::GatewayExternalError)
       it_raises_an_exception_when(response_status: 503, exception: ServiceGatewayClient::GatewayInternalResponse)
 
       context 'when the response status is an unhandled, non-200' do

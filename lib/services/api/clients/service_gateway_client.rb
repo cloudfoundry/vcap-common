@@ -38,12 +38,6 @@ module VCAP::Services::Api
       end
     end
 
-    class GatewayExternalError < ErrorResponse
-      def initialize(error)
-        super(422, error)
-      end
-    end
-
     class NotFoundResponse < ErrorResponse
       def initialize(error)
         super(404, error)
@@ -182,7 +176,6 @@ module VCAP::Services::Api
 
         case code
         when 404 then raise NotFoundResponse.new(err)
-        when 422 then raise GatewayExternalError.new(err)
         when 503 then raise GatewayInternalResponse.new(err)
         else raise ErrorResponse.new(code, err)
         end
