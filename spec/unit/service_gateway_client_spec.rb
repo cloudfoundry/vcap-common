@@ -173,13 +173,20 @@ module VCAP::Services::Api
 
         let(:error_code) { rand(5000) }
         let(:error_description) { SecureRandom.uuid }
-
+        let(:backtrace) { ["/dev/null:20:in `catch'", "/dev/null:69:in `start'", "/dev/null:12:in `<main>'"]}
+        let(:types) { ["ServiceError", "StandardError", "Exception"]}
 
         context "when the response status is #{response_status_code}" do
           before do
             stub_request(:any, /.*/).to_return(
               status: response_status_code,
-              body: {code: error_code, description: error_description}.to_json
+              body: {
+                code: error_code,
+                description: error_description,
+                backtrace: backtrace,
+                types: types,
+                cause: []
+              }.to_json
             )
           end
 
@@ -190,6 +197,9 @@ module VCAP::Services::Api
               exception.status.should == response_status_code
               exception.error.code.should == error_code
               exception.error.description.should == error_description
+              exception.error.backtrace.should == backtrace
+              exception.error.types.should == types
+              exception.error.cause.should == []
             }
           end
 
@@ -200,6 +210,9 @@ module VCAP::Services::Api
               exception.status.should == response_status_code
               exception.error.code.should == error_code
               exception.error.description.should == error_description
+              exception.error.backtrace.should == backtrace
+              exception.error.types.should == types
+              exception.error.cause.should == []
             }
           end
 
@@ -210,6 +223,9 @@ module VCAP::Services::Api
               exception.status.should == response_status_code
               exception.error.code.should == error_code
               exception.error.description.should == error_description
+              exception.error.backtrace.should == backtrace
+              exception.error.types.should == types
+              exception.error.cause.should == []
             }
           end
 
@@ -220,6 +236,9 @@ module VCAP::Services::Api
               exception.status.should == response_status_code
               exception.error.code.should == error_code
               exception.error.description.should == error_description
+              exception.error.backtrace.should == backtrace
+              exception.error.types.should == types
+              exception.error.cause.should == []
             }
           end
         end
