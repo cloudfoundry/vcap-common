@@ -183,9 +183,10 @@ module VCAP::Services::Api
               body: {
                 code: error_code,
                 description: error_description,
-                backtrace: backtrace,
-                types: types,
-                cause: []
+                error: {
+                  backtrace: backtrace,
+                  types: types
+                }
               }.to_json
             )
           end
@@ -197,9 +198,8 @@ module VCAP::Services::Api
               exception.status.should == response_status_code
               exception.error.code.should == error_code
               exception.error.description.should == error_description
-              exception.error.backtrace.should == backtrace
-              exception.error.types.should == types
-              exception.error.cause.should == []
+              exception.error.error.fetch('backtrace').should == backtrace
+              exception.error.error.fetch('types').should == types
             }
           end
 
@@ -210,9 +210,8 @@ module VCAP::Services::Api
               exception.status.should == response_status_code
               exception.error.code.should == error_code
               exception.error.description.should == error_description
-              exception.error.backtrace.should == backtrace
-              exception.error.types.should == types
-              exception.error.cause.should == []
+              exception.error.error.fetch('backtrace').should == backtrace
+              exception.error.error.fetch('types').should == types
             }
           end
 
@@ -223,9 +222,8 @@ module VCAP::Services::Api
               exception.status.should == response_status_code
               exception.error.code.should == error_code
               exception.error.description.should == error_description
-              exception.error.backtrace.should == backtrace
-              exception.error.types.should == types
-              exception.error.cause.should == []
+              exception.error.error.fetch('backtrace').should == backtrace
+              exception.error.error.fetch('types').should == types
             }
           end
 
@@ -236,9 +234,8 @@ module VCAP::Services::Api
               exception.status.should == response_status_code
               exception.error.code.should == error_code
               exception.error.description.should == error_description
-              exception.error.backtrace.should == backtrace
-              exception.error.types.should == types
-              exception.error.cause.should == []
+              exception.error.error.fetch('backtrace').should == backtrace
+              exception.error.error.fetch('types').should == types
             }
           end
         end

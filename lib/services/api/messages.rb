@@ -204,9 +204,7 @@ module VCAP
       class ServiceErrorResponse < JsonMessage
         required :code, Integer
         required :description, String
-        optional :backtrace, [String]
-        optional :types, [String]
-        optional :cause, [ServiceErrorResponse]
+        optional :error, Hash
       end
     end
   end
