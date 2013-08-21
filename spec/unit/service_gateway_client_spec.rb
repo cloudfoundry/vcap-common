@@ -11,6 +11,7 @@ describe VCAP::Services::Api::ServiceGatewayClient do
   describe '#perform_request' do
     before :all do
       @url = "http://localhost"
+      @https_url = "https://localhost"
       @token = "mytoken"
       @timeout = 10
     end
@@ -31,6 +32,7 @@ describe VCAP::Services::Api::ServiceGatewayClient do
     end
 
     it "should use net/http client when EM is not running" do
+      htturl = "https://localhost"
       client = VCAP::Services::Api::ServiceGatewayClient.new(@url, @token, @timeout)
       EM.should_receive(:reactor_running?).and_return nil
 
@@ -39,15 +41,39 @@ describe VCAP::Services::Api::ServiceGatewayClient do
       message = "data"
       resp.should_receive(:body).and_return(message)
       resp.should_receive(:code).and_return 200
-      resp.should_receive(:start).and_return resp
 
       http_method = :get
 
-      Net::HTTP.should_receive(:new).with("localhost", 80).and_return resp
+      mock_http = mock("http")
+      Net::HTTP.should_receive(:new).with("localhost", 80).and_return mock_http
+      mock_http.should_receive(:start).and_yield mock_http
+      mock_http.should_receive(:request).and_return resp
 
       result = client.perform_request(http_method, path)
       result.should == message
     end
+    
+  it "should use net/https client when EM is not running and https url is provided" do
+    client = VCAP::Services::Api::ServiceGatewayClient.new(@https_url, @token, @timeout)
+    EM.should_receive(:reactor_running?).and_return nil
+
+    path = "/path1"
+    resp = mock("resq")
+    message = "data"
+    resp.should_receive(:body).and_return(message)
+    resp.should_receive(:code).and_return 200
+
+    http_method = :get
+
+    mock_http = mock("http")
+    Net::HTTP.should_receive(:new).with("localhost", 443).and_return mock_http
+    mock_http.should_receive(:start).and_yield mock_http
+    mock_http.should_receive(:use_ssl=).with(true)
+    mock_http.should_receive(:request).and_return resp
+
+    result = client.perform_request(http_method, path)
+    result.should == message
+  end
 
 
     it "should should raise error with none 200 response" do

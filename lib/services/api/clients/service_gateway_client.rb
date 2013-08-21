@@ -163,7 +163,13 @@ module VCAP::Services::Api
         klass = METHODS_MAP[http_method]
         req = klass.new(path, initheader=@hdrs)
         req.body = msg.encode
-        resp = Net::HTTP.new(uri.host, uri.port).start {|http| http.request(req)}
+        resp = Net::HTTP.new(uri.host, uri.port).start {|http|
+          if uri.is_a?(URI::HTTPS)
+            http.use_ssl = true
+          end
+
+          http.request(req)
+        }
         code = resp.code.to_i
         body = resp.body
       end
