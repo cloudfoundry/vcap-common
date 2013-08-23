@@ -77,6 +77,13 @@ module Cf
           its(:uuid) { should_not be_nil }
         end
       end
+
+      context "when there are values with String keys" do
+        let(:config) { { "host" => "h", :varz => { "username" => "user" } } }
+
+        its(:host) { should eq "h" }
+        its(:username) { should eq "user" }
+      end
     end
 
     describe "#register_with_router" do

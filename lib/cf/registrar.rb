@@ -18,6 +18,8 @@ module Cf
     def initialize(config)
       @logger = Steno.logger("cf.registrar")
 
+      config = symbolize_keys(config)
+
       @message_bus_uri = config[:mbus]
       @host = config[:host]
       @port = config[:port]
@@ -119,6 +121,15 @@ module Cf
       @registration_timer = EM.add_periodic_timer(interval) do
         send_registration_message
       end
+    end
+
+    def symbolize_keys(hash)
+      return hash unless hash.is_a? Hash
+      Hash[
+        hash.each_pair.map do |k, v|
+            [k.to_sym, symbolize_keys(v)]
+        end
+      ]
     end
   end
 end
