@@ -29,5 +29,9 @@ module CfMessageBus
     def reconnect!
       Array(@reconnect_callbacks).each { |callback| callback.call }
     end
+
+    def connected?
+      true
+    end
   end
 end

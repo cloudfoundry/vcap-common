@@ -37,6 +37,22 @@ module CfMessageBus
       expect(bus.published_messages[1]).to eq({subject: "bar", message: {baz: :quux}, callback: monkey})
     end
 
+    it 'should record published synchronous messages' do
+      response = bus.synchronous_request("foo", {data: 1}, {option: :option})
+      expect(response).to be_nil
+
+      bus.respond_to_synchronous_request("foo", {bar: "baz"})
+      response = bus.synchronous_request("foo", {data: 2}, {option: :option})
+      expect(response).to eq("bar" => "baz")
+
+      expect(bus.published_synchronous_messages).to eq([
+        {subject: "foo", data: {data: 1}, options: {option: :option}},
+        {subject: "foo", data: {data: 2}, options: {option: :option}}
+      ])
+
+      expect(bus).to have_requested_synchronous_messages("foo", {data: 1}, {option: :option})
+    end
+
     it 'should clear published messages when asked' do
       bus.publish("foo")
       monkey = lambda { "I'm a monkey block" }
@@ -59,7 +75,7 @@ module CfMessageBus
       expect(bus).not_to have_published_with_message('foo', 'umbrella')
     end
 
-    it 'should symbolize keys to the subscriber' do
+    it 'should stringify keys to the subscriber' do
       received_data = nil
 
       bus.subscribe("foo") do |data|
@@ -67,8 +83,8 @@ module CfMessageBus
       end
       expect(received_data).to be_nil
 
-      bus.publish("foo", {'foo' => 'bar', 'baz' => 'quux'})
-      expect(received_data).to eql({foo: 'bar', baz: 'quux'})
+      bus.publish("foo", {foo: 'bar', baz: [{qu: 'ux'}]})
+      expect(received_data).to eql({'foo' => 'bar', 'baz' => [{'qu' => 'ux'}]})
     end
 
     it 'should respond to requests' do
@@ -89,8 +105,8 @@ module CfMessageBus
       end
       expect(received_data).to be_nil
 
-      bus.respond_to_request('hey guys', {'foo' => 'bar'})
-      expect(received_data).to eql({foo: 'bar'})
+      bus.respond_to_request('hey guys', {foo: 'bar'})
+      expect(received_data).to eql({'foo' => 'bar'})
     end
 
     it 'should allow unsubscribing from requests' do

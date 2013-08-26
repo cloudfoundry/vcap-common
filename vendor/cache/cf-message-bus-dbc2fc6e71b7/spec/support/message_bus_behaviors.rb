@@ -64,5 +64,9 @@ shared_examples :a_message_bus do
         raise "not actually called here"
       end
     end
+
+    it 'should know if it is connected' do
+      message_bus.connected?
+    end
   end
 end

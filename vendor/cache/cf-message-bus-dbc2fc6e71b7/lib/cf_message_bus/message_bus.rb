@@ -14,10 +14,10 @@ module CfMessageBus
       @recovery_callback = lambda {}
     end
 
-    def subscribe(subject, opts = {}, &block)
-      @subscriptions[subject] = [opts, block]
+    def subscribe(subject, options = {}, &block)
+      @subscriptions[subject] = [options, block]
 
-      subscribe_on_reactor(subject, opts) do |parsed_data, inbox|
+      subscribe_on_reactor(subject, options) do |parsed_data, inbox|
         EM.defer do
           run_handler(block, parsed_data, inbox, subject, 'subscription')
         end
@@ -35,39 +35,50 @@ module CfMessageBus
     end
 
     def request(subject, data = nil, options = {}, &block)
-      internal_bus.request(subject, encode(data), options) do |payload, inbox|
+      response_timeout = options.delete(:timeout)
+      result_count = options.delete(:result_count)
+      options[:max] = result_count if result_count
+
+      subscription_id = internal_bus.request(subject, encode(data), options) do |payload, inbox|
         process_message(payload, inbox) do |parsed_data, inbox|
           run_handler(block, parsed_data, inbox, subject, 'response')
         end
       end
+
+      if response_timeout
+        internal_bus.timeout(subscription_id, response_timeout, expected: result_count || 1) do
+          run_handler(block, {timeout: true}, nil, subject, 'timeout')
+        end
+      end
+      subscription_id
     end
 
-    def synchronous_request(subject, data = nil, opts = {})
-      result_count = opts[:result_count] || 1
-      timeout = opts[:timeout] || -1
+    def synchronous_request(subject, data = nil, options = {})
+      options[:result_count] ||= 1
+      result_count = options[:result_count]
 
       return [] if result_count <= 0
 
-      response = EM.schedule_sync do |promise|
+      EM.schedule_sync do |promise|
         results = []
 
-        sid = request(subject, encode(data), max: result_count) do |data|
-          results << data
-          promise.deliver(results) if results.size == result_count
-        end
-
-        if timeout >= 0
-          internal_bus.timeout(sid, timeout, expected: result_count) do
+        request(subject, encode(data), options) do |response|
+          if response[:timeout]
             promise.deliver(results)
+          else
+            results << response
+            promise.deliver(results) if results.size == result_count
           end
         end
       end
-
-      response
     end
 
     def unsubscribe(subscription_id)
       internal_bus.unsubscribe(subscription_id)
+    end
+
+    def connected?
+      internal_bus.connected?
     end
 
     private
@@ -95,16 +106,16 @@ module CfMessageBus
       end
     end
 
-    def subscribe_on_reactor(subject, opts = {}, &blk)
+    def subscribe_on_reactor(subject, options = {}, &blk)
       EM.schedule do
-        internal_bus.subscribe(subject, opts) do |msg, inbox|
+        internal_bus.subscribe(subject, options) do |msg, inbox|
           process_message(msg, inbox, &blk)
         end
       end
     end
 
     def process_message(msg, inbox, &block)
-      payload = JSON.parse(msg, symbolize_keys: true)
+      payload = JSON.parse(msg)
       block.yield(payload, inbox)
     rescue => e
       @logger.error "exception parsing json: '#{msg}' '#{e.inspect}'"

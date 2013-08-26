@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = "cf-message-bus"
-  s.version = "0.0.1"
+  s.version = "0.0.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["CloudFoundry Core Team"]
-  s.date = "2013-07-02"
+  s.date = "2013-08-26"
   s.description = "Abstraction layer around NATS messaging bus"
   s.email = ["cfpi-dev@googlegroups.com"]
   s.files = ["lib/cf_message_bus/message_bus.rb", "lib/cf_message_bus/message_bus_factory.rb", "lib/cf_message_bus/mock_message_bus.rb", "lib/cf_message_bus/version.rb", "lib/cf_message_bus.rb", "lib/eventmachine/schedule_sync.rb"]
@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<nats>, ["= 0.4.26"])
       s.add_runtime_dependency(%q<vcap-concurrency>, [">= 0"])
       s.add_runtime_dependency(%q<yajl-ruby>, [">= 0"])
+      s.add_runtime_dependency(%q<vcap-concurrency>, [">= 0"])
     else
       s.add_dependency(%q<bundler>, ["~> 1.3"])
       s.add_dependency(%q<rspec>, [">= 0"])
@@ -32,6 +33,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<nats>, ["= 0.4.26"])
       s.add_dependency(%q<vcap-concurrency>, [">= 0"])
       s.add_dependency(%q<yajl-ruby>, [">= 0"])
+      s.add_dependency(%q<vcap-concurrency>, [">= 0"])
     end
   else
     s.add_dependency(%q<bundler>, ["~> 1.3"])
@@ -40,5 +42,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<nats>, ["= 0.4.26"])
     s.add_dependency(%q<vcap-concurrency>, [">= 0"])
     s.add_dependency(%q<yajl-ruby>, [">= 0"])
+    s.add_dependency(%q<vcap-concurrency>, [">= 0"])
   end
 end

@@ -10,7 +10,7 @@ module CfMessageBus
     let(:bus) { MessageBus.new(uri: bus_uri, logger: logger) }
     let(:logger) { double(:logger, info: nil) }
     let(:fake_promise) { double(:promise) }
-    let(:msg) { { foo: "bar" } }
+    let(:msg) { {"foo" => "bar"} }
     let(:msg_json) { JSON.dump(msg) }
 
     before do
@@ -92,7 +92,6 @@ module CfMessageBus
       end
     end
 
-
     describe 'requesting information' do
       it 'should request on nats and parse json' do
         mock_nats.should_receive(:request).with("foo", nil, {}).and_yield(msg_json, nil)
@@ -139,10 +138,30 @@ module CfMessageBus
         mock_nats.should_receive(:request).with("foo", JSON.dump(%w[foo bar baz]), {})
         bus.request('foo', %w[foo bar baz])
       end
+
+      it 'should handle timeouts' do
+        mock_nats.stub(:request).with('foo', nil, {}).and_return(:requesty)
+        mock_nats.should_receive(:timeout).with(:requesty, 10, expected: 1).and_yield
+        called = false
+        bus.request('foo', nil, timeout: 10) do |response|
+          called = true
+          expect(response[:timeout]).to be_true
+        end
+        expect(called).to be_true
+      end
+
+      it 'should handle errors in timeouts' do
+        mock_nats.stub(:request).with('foo', nil, {}).and_return(:requesty)
+        mock_nats.should_receive(:timeout).with(:requesty, 10, expected: 1).and_yield
+        logger.should_receive(:error).with(/^exception processing timeout for: 'foo'/)
+        bus.request('foo', nil, timeout: 10) do |response|
+          raise "oops"
+        end
+      end
     end
 
     describe 'requesting information synchronously' do
-      let(:msg2) { { baz: 'quux'} }
+      let(:msg2) { {'baz' => 'quux'} }
       let(:msg2_json) { JSON.dump(msg2) }
       it 'should schedule onto the EM loop to make the request' do
         EM.should_receive(:schedule_sync).and_yield(fake_promise)
@@ -163,13 +182,13 @@ module CfMessageBus
 
       it 'should parse json into objects' do
         mock_nats.should_receive(:request).with('foo', nil, max: 1).and_yield(msg_json, nil)
-        fake_promise.should_receive(:deliver).with([{ foo: 'bar' }])
+        fake_promise.should_receive(:deliver).with([{'foo' => 'bar'}])
         bus.synchronous_request('foo', nil)
       end
 
       it 'should wait to deliver the promise if multiple results are expected' do
         mock_nats.should_receive(:request).with('foo', nil, max: 2).and_yield(msg_json, nil).and_yield(msg2_json, nil)
-        fake_promise.should_receive(:deliver).with([msg, {baz: 'quux'}])
+        fake_promise.should_receive(:deliver).with([msg, {'baz' => 'quux'}])
         bus.synchronous_request('foo', nil, result_count: 2)
       end
 
@@ -212,6 +231,13 @@ module CfMessageBus
         end
 
         mock_nats.reconnect!
+      end
+    end
+
+    context 'connected?' do
+      it 'should proxy to the internal bus' do
+        mock_nats.stub(:connected?).and_return(:something_else)
+        expect(bus.connected?).to eq(:something_else)
       end
     end
   end
