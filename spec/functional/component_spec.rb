@@ -38,7 +38,7 @@ describe VCAP::Component do
   end
 
   it "should listen for discovery messages" do
-    em do
+    em(timeout: 2.0) do
       VCAP::Component.register(default_options)
 
       nats.request("vcap.component.discover") do |msg|
