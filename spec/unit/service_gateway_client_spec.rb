@@ -107,6 +107,24 @@ module VCAP::Services::Api
 
         request.should have_been_made
       end
+      
+      describe '#perform_request (https)' do
+        let(:url) { 'https://localhost' }
+
+        it 'makes https GET requests' do
+          request = stub_request(:get, 'https://localhost/path1').
+          with(headers: {
+            "X-VCAP-Request-ID" => request_id,
+            VCAP::Services::Api::GATEWAY_TOKEN_HEADER => token
+          }).
+          to_return(status: 200, body: 'data')
+
+          result = http_client.perform_request(:get, '/path1')
+          result.should == 'data'
+
+          request.should have_been_made
+        end
+      end
 
       context "when request_id is nil" do
         it "makes POST requests without the X-VCAP-Request-ID header" do
