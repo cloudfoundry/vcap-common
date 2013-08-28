@@ -159,7 +159,12 @@ module VCAP::Services::Api
         request = klass.new(path, headers)
         request.body = msg.encode
 
-        response = Net::HTTP.new(uri.host, uri.port).start do |http|
+        opts = {}
+        if uri.scheme == "https"
+          opts[:use_ssl] = true
+        end
+        
+        response = Net::HTTP.start(uri.host, uri.port, opts) do |http|
           http.request(request)
         end
 
