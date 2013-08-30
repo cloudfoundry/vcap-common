@@ -7,7 +7,7 @@ require "vcap/component"
 describe VCAP::Component do
 
   let(:nats) do
-    nats_mock = mock("nats")
+    nats_mock = double("nats")
     nats_mock.stub(:subscribe)
     nats_mock.stub(:publish)
     nats_mock

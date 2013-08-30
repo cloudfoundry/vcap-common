@@ -31,6 +31,7 @@ PATH
       squash_ruby
       steno
       thin
+      uuidtools
       vmstat (~> 2.0)
       yajl-ruby
 
@@ -44,18 +45,18 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
     addressable (2.3.5)
-    atomic (1.1.10)
+    atomic (1.1.13)
     backports (3.3.3)
     builder (3.2.2)
     columnize (0.3.6)
     cookiejar (0.3.0)
-    crack (0.4.0)
+    crack (0.4.1)
       safe_yaml (~> 0.9.0)
     daemons (1.1.9)
-    debugger (1.6.0)
+    debugger (1.6.1)
       columnize (>= 0.3.1)
       debugger-linecache (~> 1.2.0)
-      debugger-ruby_core_source (~> 1.2.1)
+      debugger-ruby_core_source (~> 1.2.3)
     debugger-linecache (1.2.0)
     debugger-ruby_core_source (1.2.3)
     descendants_tracker (0.0.1)
@@ -69,6 +70,7 @@ GEM
     em-socksify (0.3.0)
       eventmachine (>= 1.0.0.beta.4)
     eventmachine (1.0.3)
+    eventmachine (1.0.3-x86-mingw32)
     fluent-logger (0.4.6)
       msgpack (>= 0.4.4, < 0.6.0, != 0.5.3, != 0.5.2, != 0.5.1, != 0.5.0)
       yajl-ruby (~> 1.0)
@@ -84,16 +86,17 @@ GEM
       virtus
     hashie (2.0.5)
     http_parser.rb (0.6.0.beta.2)
-    httpclient (2.3.3)
-    i18n (0.6.4)
+    httpclient (2.3.4.1)
+    i18n (0.6.5)
     json (1.8.0)
     json_pure (1.8.0)
     membrane (0.0.2)
-    mime-types (1.23)
+    mime-types (1.25)
     minitest (4.7.5)
     msgpack (0.5.5)
-    multi_json (1.7.7)
-    multi_xml (0.5.4)
+    msgpack (0.5.5-x86-mingw32)
+    multi_json (1.7.9)
+    multi_xml (0.5.5)
     multipart-post (1.2.0)
     nats (0.4.26)
       daemons (>= 1.1.5)
@@ -109,44 +112,60 @@ GEM
     rack-protection (1.5.0)
       rack
     rake (0.9.6)
-    rspec (2.13.0)
-      rspec-core (~> 2.13.0)
-      rspec-expectations (~> 2.13.0)
-      rspec-mocks (~> 2.13.0)
-    rspec-core (2.13.1)
-    rspec-expectations (2.13.0)
+    rspec (2.14.1)
+      rspec-core (~> 2.14.0)
+      rspec-expectations (~> 2.14.0)
+      rspec-mocks (~> 2.14.0)
+    rspec-core (2.14.5)
+    rspec-expectations (2.14.2)
       diff-lcs (>= 1.1.3, < 2.0)
-    rspec-mocks (2.13.1)
-    safe_yaml (0.9.3)
+    rspec-mocks (2.14.3)
+    safe_yaml (0.9.5)
     sinatra (1.4.3)
       rack (~> 1.4)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
     squash_ruby (1.2.0)
       json
-    steno (1.1.0)
+    steno (1.2.2)
       fluent-logger
       grape
+      yajl-ruby (~> 1.0)
+    steno (1.2.2-x86-mingw32)
+      fluent-logger
+      grape
+      win32-eventlog
       yajl-ruby (~> 1.0)
     thin (1.5.1)
       daemons (>= 1.0.9)
       eventmachine (>= 0.12.6)
       rack (>= 1.0.0)
-    thread_safe (0.1.0)
+    thread_safe (0.1.2)
       atomic
     tilt (1.4.1)
     tzinfo (0.3.37)
+    uuidtools (2.1.4)
     virtus (0.5.5)
       backports (~> 3.3)
       descendants_tracker (~> 0.0.1)
     vmstat (2.0.0)
-    webmock (1.12.3)
+    webmock (1.13.0)
       addressable (>= 2.2.7)
       crack (>= 0.3.2)
+    win32-api (1.5.0-x86-mingw32)
+    win32-eventlog (0.5.3)
+      windows-pr (>= 0.9.3)
+    windows-api (0.4.2)
+      win32-api (>= 1.4.5)
+    windows-pr (1.2.2)
+      win32-api (>= 1.4.5)
+      windows-api (>= 0.3.0)
     yajl-ruby (1.1.0)
+    yajl-ruby (1.1.0-x86-mingw32)
 
 PLATFORMS
   ruby
+  x86-mingw32
 
 DEPENDENCIES
   cf-message-bus!

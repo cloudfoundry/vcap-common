@@ -6,7 +6,7 @@ describe VCAP::Subprocess do
   end
 
   describe '#run' do
-    it 'should capture both stdout and stderr' do
+    it 'should capture both stdout and stderr', unix_only: true do
       stdout, stderr, status = @subprocess.run('echo foo >&2')
       stdout.should == ""
       stderr.should == "foo\n"
@@ -18,7 +18,7 @@ describe VCAP::Subprocess do
       status.should == 0
     end
 
-    it 'should raise exceptions on exit status mismatch' do
+    it 'should raise exceptions on exit status mismatch', unix_only: true do
       begin
         ex_thrown = false
         @subprocess.run('exit 10')
@@ -30,18 +30,18 @@ describe VCAP::Subprocess do
       end
     end
 
-    it 'should properly validate nonzero exit statuses' do
+    it 'should properly validate nonzero exit statuses', unix_only: true do
       stdout, stderr, status = @subprocess.run('exit 10', 10)
       status.exitstatus.should == 10
     end
 
-    it 'should kill processes that run too long' do
+    it 'should kill processes that run too long', unix_only: true do
       expect do
         VCAP::Subprocess.run('sleep 5', 0, 1)
       end.to raise_error(VCAP::SubprocessTimeoutError)
     end
 
-    it 'should call previously installed SIGCHLD handlers' do
+    it 'should call previously installed SIGCHLD handlers', unix_only: true do
       handler_called = false
       trap('CLD') { handler_called = true }
       VCAP::Subprocess.run('echo foo')

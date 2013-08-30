@@ -9,7 +9,7 @@ describe VCAP::RollingMetric do
 
   it "should track basic samples" do
     metric = VCAP::RollingMetric.new(60, 4)
-    Time.stub!(:now).and_return(0, 15, 30, 45, 45)
+    Time.stub(:now).and_return(0, 15, 30, 45, 45)
     metric << 10
     metric << 20
     metric << 30
@@ -19,7 +19,7 @@ describe VCAP::RollingMetric do
 
   it "should aggregate per bucket" do
     metric = VCAP::RollingMetric.new(60, 4)
-    Time.stub!(:now).and_return(0, 5, 10, 15, 15)
+    Time.stub(:now).and_return(0, 5, 10, 15, 15)
     metric << 10
     metric << 20
     metric << 30
@@ -29,7 +29,7 @@ describe VCAP::RollingMetric do
 
   it "should overwrite old samples" do
     metric = VCAP::RollingMetric.new(60, 4)
-    Time.stub!(:now).and_return(0, 60, 60)
+    Time.stub(:now).and_return(0, 60, 60)
     metric << 10
     metric << 30
     metric.value.should == {:value => 30, :samples => 1}
@@ -37,7 +37,7 @@ describe VCAP::RollingMetric do
 
   it "should ignore old samples" do
     metric = VCAP::RollingMetric.new(60, 4)
-    Time.stub!(:now).and_return(0, 15, 60)
+    Time.stub(:now).and_return(0, 15, 60)
     metric << 10
     metric << 30
     metric.value.should == {:value => 0, :samples => 0}

@@ -79,11 +79,11 @@ module Cf
     end
 
     private
-
     def handle_router_greeting(message)
       send_registration_message
 
-      if (interval = message["minimumRegisterIntervalInSeconds"])
+      # bug in mock_message_bus.rb that to_s on the key that causes this to fail when :minimumRegisterIntervalInSeconds
+      if (interval = message['minimumRegisterIntervalInSeconds'])
         setup_interval(interval)
       end
     end
