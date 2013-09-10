@@ -63,13 +63,15 @@ module VCAP::Services::Api
           and_return({
             service_id: service_id,
             configuration: {setting: true},
-            credentials: {user: 'admin', pass: 'secret'}
+            credentials: {user: 'admin', pass: 'secret'},
+            syslog_drain_url: "syslog://example.com"
           }.to_json)
 
         response = client.bind(service_id: service_id)
         expect(response.service_id).to be == service_id
         expect(response.configuration).to be == {'setting' => true}
         expect(response.credentials).to be == {'user' => 'admin', 'pass' => 'secret'}
+        expect(response.syslog_drain_url).to be == "syslog://example.com"
       end
     end
 

@@ -111,6 +111,7 @@ module VCAP
         required :configuration
         required :credentials
         optional :dashboard_url, String
+        optional :syslog_drain_url, String
       end
 
       #
