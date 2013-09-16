@@ -12,11 +12,11 @@ Gem::Specification.new do |s|
   s.files = ["lib/cf_message_bus/message_bus.rb", "lib/cf_message_bus/message_bus_factory.rb", "lib/cf_message_bus/mock_message_bus.rb", "lib/cf_message_bus/version.rb", "lib/cf_message_bus.rb", "lib/eventmachine/schedule_sync.rb"]
   s.licenses = ["Apache"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.23"
+  s.rubygems_version = "2.0.7"
   s.summary = "Cloud Foundry message bus"
 
   if s.respond_to? :specification_version then
-    s.specification_version = 3
+    s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_development_dependency(%q<bundler>, ["~> 1.3"])

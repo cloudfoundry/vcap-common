@@ -15,15 +15,17 @@ describe 'PidFile Tests' do
     File.exists?(@pid_file).should be_true
   end
 
-  it "should overwrite pid file if pid file exists and contained pid isn't running" do
+
+  it "should overwrite pid file if pid file exists and contained pid isn't running", unix_only: true do
     fork { VCAP::PidFile.new(@pid_file) }
+
     Process.wait()
     VCAP::PidFile.new(@pid_file)
     pid = File.open(@pid_file) {|f| pid = f.read().strip().to_i()}
     pid.should == Process.pid()
   end
 
-  it "should throw exception if pid file exists and contained pid has running process" do
+  it "should throw exception if pid file exists and contained pid has running process", unix_only: true do
     child_pid = fork {
       VCAP::PidFile.new(@pid_file)
       Signal.trap('HUP') { exit }
@@ -52,7 +54,7 @@ describe 'PidFile Tests' do
     File.exists?(@pid_file).should be_false
   end
 
-  it "unlink_at_exit() should remove pidfile upon exit" do
+  it "unlink_at_exit() should remove pidfile upon exit", unix_only: true do
     child_pid = fork {
       pf = VCAP::PidFile.new(@pid_file)
       pf.unlink_at_exit()
@@ -65,7 +67,7 @@ describe 'PidFile Tests' do
     File.exists?(@pid_file).should be_false
   end
 
-  it "unlink_on_signals() should remove pidfile upon receipt of signal" do
+  it "unlink_on_signals() should remove pidfile upon receipt of signal", unix_only: true do
     child_pid = fork {
       pf = VCAP::PidFile.new(@pid_file)
       pf.unlink_on_signals('HUP')
@@ -78,7 +80,6 @@ describe 'PidFile Tests' do
     Process.kill('TERM', child_pid)
     Process.wait()
     File.exists?(@pid_file).should be_false
-
   end
 
 end

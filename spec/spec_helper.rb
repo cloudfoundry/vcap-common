@@ -35,6 +35,12 @@ RSpec.configure do |c|
   unless ENV['QUOTA_TEST_USER'] && ENV['QUOTA_TEST_FS']
     c.filter_run_excluding :needs_quota => true
   end
+
+  if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+    c.filter_run_excluding :unix_only => true
+  else
+    c.filter_run_excluding :windows_only => true
+  end
 end
 
 def fixture_path(*args)

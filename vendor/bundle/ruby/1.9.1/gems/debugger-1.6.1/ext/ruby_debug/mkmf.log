@@ -1,0 +1,144 @@
+have_struct_member: checking for rb_method_entry_t.called_id in method.h... -------------------- yes
+
+"/usr/local/bin/gcc-4.2 -o conftest -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe conftest.c  -L. -L/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/lib -L/usr/local/opt/libyaml/lib -L/usr/local/opt/readline/lib -L/usr/local/opt/libksba/lib -L/usr/local/opt/openssl/lib -L.  -L/usr/local/opt/libyaml/lib -L/usr/local/opt/readline/lib -L/usr/local/opt/libksba/lib -L/usr/local/opt/openssl/lib      -lruby.1.9.1  -lpthread -ldl -lobjc "
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: int main(int argc, char **argv)
+4: {
+5:   return 0;
+6: }
+/* end */
+
+"/usr/local/bin/gcc-4.2 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe   -c conftest.c"
+checked program was:
+/* begin */
+ 1: #include "ruby.h"
+ 2: 
+ 3: #include <method.h>
+ 4: 
+ 5: /*top*/
+ 6: int s = (char *)&((rb_method_entry_t*)0)->called_id - (char *)0;
+ 7: int main(int argc, char **argv)
+ 8: {
+ 9:   if (argc > 1000000) {
+10:     printf("%p", &s);
+11:   }
+12: 
+13:   return 0;
+14: }
+/* end */
+
+--------------------
+
+have_header: checking for vm_core.h... -------------------- yes
+
+"/usr/local/bin/gcc-4.2 -E -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe  conftest.c -o conftest.i"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <vm_core.h>
+/* end */
+
+--------------------
+
+have_header: checking for iseq.h... -------------------- yes
+
+"/usr/local/bin/gcc-4.2 -E -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe  conftest.c -o conftest.i"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <iseq.h>
+/* end */
+
+--------------------
+
+have_header: checking for insns.inc... -------------------- yes
+
+"/usr/local/bin/gcc-4.2 -E -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe  conftest.c -o conftest.i"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <insns.inc>
+/* end */
+
+--------------------
+
+have_header: checking for insns_info.inc... -------------------- yes
+
+"/usr/local/bin/gcc-4.2 -E -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe  conftest.c -o conftest.i"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <insns_info.inc>
+/* end */
+
+--------------------
+
+have_header: checking for eval_intern.h... -------------------- yes
+
+"/usr/local/bin/gcc-4.2 -E -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe  conftest.c -o conftest.i"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <eval_intern.h>
+/* end */
+
+--------------------
+
+have_type: checking for struct iseq_line_info_entry in vm_core.h,iseq.h... -------------------- no
+
+"/usr/local/bin/gcc-4.2 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe   -c conftest.c"
+conftest.c:8: error: invalid application of ‘sizeof’ to incomplete type ‘conftest_type’ 
+conftest.c:8: error: size of array ‘conftestval’ is negative
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <vm_core.h>
+4: #include <iseq.h>
+5: 
+6: /*top*/
+7: typedef struct iseq_line_info_entry conftest_type;
+8: int conftestval[sizeof(conftest_type)?1:-1];
+/* end */
+
+--------------------
+
+have_type: checking for struct iseq_insn_info_entry in vm_core.h,iseq.h... -------------------- yes
+
+"/usr/local/bin/gcc-4.2 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe   -c conftest.c"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <vm_core.h>
+4: #include <iseq.h>
+5: 
+6: /*top*/
+7: typedef struct iseq_insn_info_entry conftest_type;
+8: int conftestval[sizeof(conftest_type)?1:-1];
+/* end */
+
+--------------------
+
+block in <main>: checking for if rb_iseq_compile_with_option was added an argument filepath... -------------------- yes
+
+"/usr/local/bin/gcc-4.2 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/x86_64-darwin12.4.0 -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1/ruby/backward -I/Users/scottdensmore/.rvm/rubies/ruby-1.9.3-p448/include/ruby-1.9.1 -I. -I/Users/scottdensmore/.rvm/src/ruby-1.9.3-p448 -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE   -I/usr/local/opt/libyaml/include -I/usr/local/opt/readline/include -I/usr/local/opt/libksba/include -I/usr/local/opt/openssl/include  -O3 -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe   -c conftest.c"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <ruby.h>
+4: #include "vm_core.h"
+5: extern VALUE rb_iseq_new_main(NODE *node, VALUE filename, VALUE filepath);
+/* end */
+
+--------------------
+

@@ -1,6 +1,5 @@
 require 'vcap/common'
 
-
 module VCAP
   module Spec
     module ForkedComponent

@@ -193,7 +193,7 @@ module VCAP
           # to drain the pipe. Note that we only need to write a single byte
           # to detect if our child has exited.
           write_pipe.write_nonblock('x') unless write_pipe.closed?
-        rescue IO::WaitWritable
+          rescue IO::WaitWritable
         end
         prev_handler.call if prev_handler
       end
