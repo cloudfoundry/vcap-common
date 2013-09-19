@@ -4,7 +4,7 @@ require "vcap/spec/em"
 require "em-http/version"
 require 'webmock'
 
-describe VCAP::Component do
+describe VCAP::Component, unix_only: true do
   include VCAP::Spec::EM
 
   before :each do
@@ -100,12 +100,12 @@ describe VCAP::Component do
       em do
         options = { :type => 'suppress_test', :nats => nats }
         options[:config] = {
-          :mbus => 'nats://user:pass@localhost:4223',
-          :keys => 'sekret!keys',
-          :password => 'crazy',
-          :pass => 'crazy',
-          :database_environment => { :stuff => 'should not see' },
-          :token => 't0ken'
+            :mbus => 'nats://user:pass@localhost:4223',
+            :keys => 'sekret!keys',
+            :password => 'crazy',
+            :pass => 'crazy',
+            :database_environment => { :stuff => 'should not see' },
+            :token => 't0ken'
         }
         VCAP::Component.register(options)
         done
@@ -117,12 +117,12 @@ describe VCAP::Component do
       em do
         options = { :type => 'suppress_test', :nats => nats }
         options[:config] = {
-          :mbus => 'nats://user:pass@localhost:4223',
-          :keys => 'sekret!keys',
-          :password => 'crazy',
-          :pass => 'crazy',
-          :database_environment => { :stuff => 'should not see' },
-          :this_is_ok => { :password => 'sekret!', :pass => 'sekret!', :test => 'ok', :token => 't0ken'}
+            :mbus => 'nats://user:pass@localhost:4223',
+            :keys => 'sekret!keys',
+            :password => 'crazy',
+            :pass => 'crazy',
+            :database_environment => { :stuff => 'should not see' },
+            :this_is_ok => { :password => 'sekret!', :pass => 'sekret!', :test => 'ok', :token => 't0ken'}
         }
         VCAP::Component.register(options)
         done
@@ -134,24 +134,24 @@ describe VCAP::Component do
       em do
         options = { :type => 'suppress_test', :nats => nats }
         options[:config] = {
-          :mbus => 'nats://user:pass@localhost:4223',
-          :keys => 'sekret!keys',
-          :mysql => { :user => 'derek', :password => 'sekret!', :pass => 'sekret!' },
-          :password => 'crazy',
-          :pass => 'crazy',
-          :database_environment => { :stuff => 'should not see' },
-          :this_is_ok => { :password => 'sekret!', :pass => 'sekret!', :mysql => 'sekret!', :test => 'ok', :token => 't0ken'}
+            :mbus => 'nats://user:pass@localhost:4223',
+            :keys => 'sekret!keys',
+            :mysql => { :user => 'derek', :password => 'sekret!', :pass => 'sekret!' },
+            :password => 'crazy',
+            :pass => 'crazy',
+            :database_environment => { :stuff => 'should not see' },
+            :this_is_ok => { :password => 'sekret!', :pass => 'sekret!', :mysql => 'sekret!', :test => 'ok', :token => 't0ken'}
         }
         VCAP::Component.register(options)
 
         options.should include(:config => {
-          :mbus => 'nats://user:pass@localhost:4223',
-          :keys => 'sekret!keys',
-          :mysql => { :user => 'derek', :password => 'sekret!', :pass => 'sekret!' },
-          :password => 'crazy',
-          :pass => 'crazy',
-          :database_environment => { :stuff => 'should not see' },
-          :this_is_ok => { :password => 'sekret!', :pass => 'sekret!', :mysql => 'sekret!', :test => 'ok', :token => 't0ken'}
+            :mbus => 'nats://user:pass@localhost:4223',
+            :keys => 'sekret!keys',
+            :mysql => { :user => 'derek', :password => 'sekret!', :pass => 'sekret!' },
+            :password => 'crazy',
+            :pass => 'crazy',
+            :database_environment => { :stuff => 'should not see' },
+            :this_is_ok => { :password => 'sekret!', :pass => 'sekret!', :mysql => 'sekret!', :test => 'ok', :token => 't0ken'}
         })
         done
       end
