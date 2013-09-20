@@ -50,7 +50,7 @@ describe VCAP::Component, unix_only: true do
   end
 
   it "should allow you to set an index" do
-    em do
+    em(timeout: 2.0) do
       options = default_options
       options[:index] = 5
 
