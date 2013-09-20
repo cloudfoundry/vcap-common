@@ -1,11 +1,13 @@
 # Copyright (c) 2009-2011 VMware, Inc.
 require 'fileutils'
 require 'socket'
+require 'uuidtools'
 
 # VMware's Cloud Application Platform
 
 module VCAP
 
+  WINDOWS = RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
   A_ROOT_SERVER = '198.41.0.4'
 
   def self.local_ip(route = A_ROOT_SERVER)
@@ -17,16 +19,18 @@ module VCAP
   end
 
   def self.secure_uuid
-    File.open('/dev/urandom') { |x| x.read(16).unpack('H*')[0] }
+    result = UUIDTools::UUID.random_create.to_s.delete('-')
   end
 
   def self.grab_ephemeral_port
     socket = TCPServer.new('0.0.0.0', 0)
     socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_REUSEADDR, true)
-    Socket.do_not_reverse_lookup = true
+    orig, Socket.do_not_reverse_lookup = Socket.do_not_reverse_lookup, true
     port = socket.addr[1]
     socket.close
     return port
+  ensure
+    Socket.do_not_reverse_lookup = orig
   end
 
   def self.uptime_string(delta)
@@ -54,6 +58,8 @@ module VCAP
       `hwprefs cpu_count`.strip.to_i
     elsif RUBY_PLATFORM =~ /freebsd|netbsd/
       `sysctl hw.ncpu`.strip.to_i
+    elsif WINDOWS
+      (ENV['NUMBER_OF_PROCESSORS'] || 1).to_i
     else
       return 1 # unknown..
     end
@@ -99,7 +105,11 @@ module VCAP
 
   def self.process_running?(pid)
     return false unless pid && (pid > 0)
-    output = %x[ps -o rss= -p #{pid}]
+    if WINDOWS
+      output = %x[tasklist /nh /fo csv /fi "pid eq #{pid}"]
+    else
+      output = %x[ps -o rss= -p #{pid}]
+    end
     return true if ($? == 0 && !output.empty?)
     # fail otherwise..
     return false

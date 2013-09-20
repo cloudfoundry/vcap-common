@@ -94,7 +94,13 @@ module VCAP
 
         if Time.now.to_f - @last_varz_update >= 1
           # Grab current cpu and memory usage
-          rss, pcpu = `ps -o rss=,pcpu= -p #{Process.pid}`.split
+          if WINDOWS
+            # memory
+            rss = windows_memory
+            pcpu = windows_cpu
+          else
+            rss, pcpu = `ps -o rss=,pcpu= -p #{Process.pid}`.split
+          end
 
           # Update varz
           varz.synchronize do
@@ -228,6 +234,53 @@ module VCAP
         config = Marshal.load(Marshal.dump(config))
         clear_level(config)
         config
+      end
+
+      private
+
+      def windows_memory
+        out_ary = memory_list.split
+        rss = out_ary[4].delete(',').to_i
+        rss
+      end
+
+      def memory_list
+        out_ary = %x[tasklist /nh /fi "pid eq #{Process.pid}"]
+        out_ary
+      end
+
+      def windows_cpu
+        pcpu = 0
+        process_ary = process_list
+        pid = Process.pid
+        idx_of_process = -1
+        process_line_ary = process_ary.split("\n")
+        ary_to_search = process_line_ary[2].split(",")
+        ary_to_search.each_with_index { |val, idx|
+          pid_s = val.gsub(/"/, '')
+          pid_to_i = pid_s.to_i
+          if (pid == pid_to_i)
+            idx_of_process = idx
+          end
+        }
+        if idx_of_process >= 0
+          cpu_ary = process_time
+          cpu_line_ary = cpu_ary.split("\n")
+          ary_to_search = cpu_line_ary[2].split(",")
+          cpu = ary_to_search[idx_of_process]
+          pcpu = cpu.gsub(/"/, '').to_f
+        end
+        pcpu
+      end
+
+      def process_list
+        process_str = %x[typeperf -sc 1 "\\Process(ruby*)\\ID Process"]
+        process_str
+      end
+
+      def process_time
+        cpu_ary = %x[typeperf -sc 1 "\\Process(ruby*)\\% processor time"]
+        cpu_ary
       end
     end
   end

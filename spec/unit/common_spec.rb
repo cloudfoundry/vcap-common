@@ -40,4 +40,32 @@ describe VCAP do
 
   end
 
+  describe ".num_cores", windows_only:true do
+    it "returns number of cores" do
+      expect(VCAP.num_cores).to eq(ENV['NUMBER_OF_PROCESSORS'].to_i)
+    end
+  end
+
+  describe ".process_running?", windows_only:true do
+    before do
+      allow_message_expectations_on_nil
+    end
+
+    describe "windows" do
+      before do
+        stub_const('VCAP::WINDOWS', true)
+        $?.stub(:'==').with(0) { true }
+      end
+
+      it "With a running process" do
+        subject.should_receive(:'`').with('tasklist /nh /fo csv /fi "pid eq 12"').and_return('some output')
+        expect(VCAP.process_running?(12)).to be_true
+      end
+
+      it "Without a running process" do
+        subject.should_receive(:'`').with('tasklist /nh /fo csv /fi "pid eq 12"').and_return('')
+        expect(VCAP.process_running?(12)).to be_false
+      end
+    end
+  end
 end
