@@ -71,56 +71,53 @@ describe VCAP::Component do
       VCAP::Component.stub(:start_http_server)
 
       foo = Object.new
-      options = { :log_counter => foo, :nats => nats }
+      options = {:log_counter => foo, :nats => nats}
       VCAP::Component.register(options)
       expect(VCAP::Component.varz[:log_counts]).to eq foo
     end
   end
 
-  describe 'updated_varz' do
+  describe '.updated_varz' do
 
-    it 'includes memory information', windows_only:true do
+    before do
+      stub_const('VCAP::WINDOWS', true)
       EventMachine.stub(:reactor_running?).and_return(true)
       VCAP::Component.stub(:start_http_server)
       VCAP::Component.register(:nats => nats)
-      Vmstat.stub_chain(:memory, :active_bytes).and_return 75
-      Vmstat.stub_chain(:memory, :wired_bytes).and_return 25
-      Vmstat.stub_chain(:memory, :inactive_bytes).and_return 660
-      Vmstat.stub_chain(:memory, :free_bytes).and_return 340
-      Vmstat.stub_chain(:load_average, :one_minute).and_return 2.0
-      VCAP::Component.stub(:windows_cpu).and_return 1
-      VCAP::Component.stub(:memory_list).and_return "ruby.exe                       416 Console                    1     55,792 K"
-
-      VCAP::Component.updated_varz[:mem].should == 55792
+      Process.stub(pid: 9999)
     end
 
-    it 'includes CPU information', windows_only:true do
-      EventMachine.stub(:reactor_running?).and_return(true)
-      Process.stub(:pid).and_return 1852
-      VCAP::Component.stub(:start_http_server)
-      VCAP::Component.register(:nats => nats)
-      Vmstat.stub_chain(:memory, :active_bytes).and_return 75
-      Vmstat.stub_chain(:memory, :wired_bytes).and_return 25
-      Vmstat.stub_chain(:memory, :inactive_bytes).and_return 660
-      Vmstat.stub_chain(:memory, :free_bytes).and_return 340
-      Vmstat.stub_chain(:load_average, :one_minute).and_return 2.0
-      VCAP::Component.stub(:windows_memory).and_return 55792
-      VCAP::Component.stub(:process_list).and_return <<LIST
+    let(:task_list) {
+      'ruby.exe                       416 Console                    1     55,792 K'
+    }
 
-"(PDH-CSV 4.0)","\\MACHINE\Process(rubymine)\ID Process"
-"09/19/2013 15:38:46.438","1852.000000"
-
-The command completed successfully.
-LIST
-      VCAP::Component.stub(:process_time).and_return <<TIME
+    let(:process_time) {
+      <<TIME
 
 "(PDH-CSV 4.0)","\\MACHINE\Process(rubymine)\% processor time"
 "09/19/2013 15:41:35.540","12.000000"
 
 The command completed successfully.
 TIME
+    }
 
-      VCAP::Component.updated_varz[:cpu].should == 12
+    let(:process_list) {
+      <<LIST
+
+"(PDH-CSV 4.0)","\\MACHINE\Process(rubymine)\ID Process"
+"09/19/2013 15:38:46.438","9999.000000"
+
+The command completed successfully.
+LIST
+    }
+
+    it 'includes memory/cpu information' do
+      VCAP::Component.should_receive(:'`').with('tasklist /nh /fi "pid eq 9999"').and_return(task_list)
+      VCAP::Component.should_receive(:'`').with('typeperf -sc 1 "\\Process(ruby*)\\ID Process"').and_return(process_list)
+      VCAP::Component.should_receive(:'`').with('typeperf -sc 1 "\\Process(ruby*)\\% processor time"').and_return(process_time)
+
+      expect(VCAP::Component.updated_varz[:mem]).to eq 55792
+      expect(VCAP::Component.updated_varz[:cpu].should).to eq 12
     end
   end
 end
