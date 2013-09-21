@@ -110,11 +110,22 @@ module VCAP
             varz[:mem] = rss.to_i
             varz[:cpu] = pcpu.to_f
 
-            memory = Vmstat.memory
-            varz[:mem_used_bytes] = memory.active_bytes + memory.wired_bytes
-            varz[:mem_free_bytes] = memory.inactive_bytes + memory.free_bytes
+            if WINDOWS
+              mem = windows_memory_used
+              varz[:mem_used_bytes] = mem[:total] - mem[:available]
+              varz[:mem_free_bytes] = mem[:available]
+            else
+              memory = Vmstat.memory
+              varz[:mem_used_bytes] = memory.active_bytes + memory.wired_bytes
+              varz[:mem_free_bytes] = memory.inactive_bytes + memory.free_bytes
+            end
 
-            varz[:cpu_load_avg] = Vmstat.load_average.one_minute
+            if WINDOWS
+              varz[:cpu_load_avg] = windows_cpu_load
+            else
+              varz[:cpu_load_avg] = Vmstat.load_average.one_minute
+            end
+
 
             # Return duplicate while holding lock
             return varz.dup
@@ -237,6 +248,24 @@ module VCAP
       end
 
       private
+
+      def system_memory_list
+        mem_ary = %x[systeminfo | findstr "\\<Physical Memory>\\"]
+        mem_ary
+      end
+
+      def windows_memory_used
+        mem_ary = system_memory_list.split
+        mem = Hash.new
+        mem[:total] = (mem_ary[3].gsub(',', '').to_i * 1024) * 1024
+        mem[:available] = (mem_ary[8].gsub(',', '').to_i * 1024) * 1024
+        mem
+      end
+
+      def windows_cpu_load
+        avg_load = %x[powershell -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned "Get-WmiObject win32_processor | Measure-Object -property LoadPercentage -Average | Foreach {$_.Average}"]
+        avg_load.to_i
+      end
 
       def windows_memory
         out_ary = memory_list.split

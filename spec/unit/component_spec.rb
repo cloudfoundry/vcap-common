@@ -87,6 +87,13 @@ describe VCAP::Component do
       Process.stub(pid: 9999)
     end
 
+    let(:system_memory_list) {
+      <<MEM_LIST
+Total Physical Memory:     8,191 MB
+Available Physical Memory: 5,903 MB
+MEM_LIST
+    }
+
     let(:task_list) {
       'ruby.exe                       416 Console                    1     55,792 K'
     }
@@ -111,13 +118,16 @@ The command completed successfully.
 LIST
     }
 
-    it 'includes memory/cpu information' do
+    it 'includes memory/cpu/avg cpu load information' do
+      VCAP::Component.should_receive(:'`').with('systeminfo | findstr "\\<Physical Memory>\\"').and_return(system_memory_list)
+      VCAP::Component.should_receive(:'`').with('powershell -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned "Get-WmiObject win32_processor | Measure-Object -property LoadPercentage -Average | Foreach {$_.Average}"').and_return(24)
       VCAP::Component.should_receive(:'`').with('tasklist /nh /fi "pid eq 9999"').and_return(task_list)
       VCAP::Component.should_receive(:'`').with('typeperf -sc 1 "\\Process(ruby*)\\ID Process"').and_return(process_list)
       VCAP::Component.should_receive(:'`').with('typeperf -sc 1 "\\Process(ruby*)\\% processor time"').and_return(process_time)
 
       expect(VCAP::Component.updated_varz[:mem]).to eq 55792
       expect(VCAP::Component.updated_varz[:cpu].should).to eq 12
+      expect(VCAP::Component.updated_varz[:cpu_load_avg]).to eq 24
     end
   end
 end
