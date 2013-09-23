@@ -84,50 +84,22 @@ describe VCAP::Component do
       EventMachine.stub(:reactor_running?).and_return(true)
       VCAP::Component.stub(:start_http_server)
       VCAP::Component.register(:nats => nats)
+      VCAP::WinStats.stub(:process_memory).and_return(55792)
+      VCAP::WinStats.stub(:process_cpu).and_return(12)
+      VCAP::WinStats.stub(:cpu_load).and_return(24)
+      mem = Hash.new
+      mem[:total] = 8588886016
+      mem[:available] = 6189744128
+      VCAP::WinStats.stub(:memory_used).and_return(mem)
       Process.stub(pid: 9999)
     end
 
-    let(:system_memory_list) {
-      <<MEM_LIST
-Total Physical Memory:     8,191 MB
-Available Physical Memory: 5,903 MB
-MEM_LIST
-    }
-
-    let(:task_list) {
-      'ruby.exe                       416 Console                    1     55,792 K'
-    }
-
-    let(:process_time) {
-      <<TIME
-
-"(PDH-CSV 4.0)","\\MACHINE\Process(rubymine)\% processor time"
-"09/19/2013 15:41:35.540","12.000000"
-
-The command completed successfully.
-TIME
-    }
-
-    let(:process_list) {
-      <<LIST
-
-"(PDH-CSV 4.0)","\\MACHINE\Process(rubymine)\ID Process"
-"09/19/2013 15:38:46.438","9999.000000"
-
-The command completed successfully.
-LIST
-    }
-
     it 'includes memory/cpu/avg cpu load information' do
-      VCAP::Component.should_receive(:'`').with('systeminfo | findstr "\\<Physical Memory>\\"').and_return(system_memory_list)
-      VCAP::Component.should_receive(:'`').with('powershell -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned "Get-WmiObject win32_processor | Measure-Object -property LoadPercentage -Average | Foreach {$_.Average}"').and_return(24)
-      VCAP::Component.should_receive(:'`').with('tasklist /nh /fi "pid eq 9999"').and_return(task_list)
-      VCAP::Component.should_receive(:'`').with('typeperf -sc 1 "\\Process(ruby*)\\ID Process"').and_return(process_list)
-      VCAP::Component.should_receive(:'`').with('typeperf -sc 1 "\\Process(ruby*)\\% processor time"').and_return(process_time)
-
       expect(VCAP::Component.updated_varz[:mem]).to eq 55792
       expect(VCAP::Component.updated_varz[:cpu].should).to eq 12
       expect(VCAP::Component.updated_varz[:cpu_load_avg]).to eq 24
+      expect(VCAP::Component.updated_varz[:mem_used_bytes]).to eq 2399141888
+      expect(VCAP::Component.updated_varz[:mem_free_bytes]).to eq 6189744128
     end
   end
 end
