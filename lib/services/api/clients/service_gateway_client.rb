@@ -34,7 +34,16 @@ module VCAP::Services::Api
       end
 
       def to_s
-        "Reponse status:#{status},error:[#{error.extract}]"
+        "#{self.class.name}: #{error.description}"
+      end
+
+      def to_h
+        {
+          'backtrace' => backtrace,
+          'status' => status,
+          'types' => self.class.ancestors.map(&:name) - Exception.ancestors.map(&:name),
+          'error' => error.extract(stringify_keys: true)
+        }
       end
     end
 
