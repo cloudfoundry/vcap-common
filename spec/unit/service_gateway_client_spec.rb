@@ -220,17 +220,17 @@ module VCAP::Services::Api
               exception.error.description.should == error_description
               exception.error.error.fetch('backtrace').should == backtrace
               exception.error.error.fetch('types').should == types
-              exception.to_h.should include(
-                'status' => response_status_code,
-                'error' => {
-                  'description' => error_description,
-                  'code' => error_code,
-                  'error' => {
-                    'backtrace' => backtrace,
-                    'types' => types
-                  }
-                }
+              error_hash = exception.to_h
+              error_hash.fetch('error').fetch('description').should == error_description
+              error_hash.fetch('error').fetch('code').should == error_code
+              error_hash.fetch('error').fetch('backtrace').should_not be_empty
+              error_hash.fetch('error').fetch('types').should include(
+                "VCAP::Services::Api::ServiceGatewayClient::ErrorResponse"
               )
+              error_hash.fetch('error').fetch('error').should == {
+                'backtrace' => backtrace,
+                'types' => types
+              }
             }
           end
 
@@ -243,17 +243,17 @@ module VCAP::Services::Api
               exception.error.description.should == error_description
               exception.error.error.fetch('backtrace').should == backtrace
               exception.error.error.fetch('types').should == types
-              exception.to_h.should include(
-                'status' => response_status_code,
-                'error' => {
-                  'description' => error_description,
-                  'code' => error_code,
-                  'error' => {
-                    'backtrace' => backtrace,
-                    'types' => types
-                  }
-                }
+              error_hash = exception.to_h
+              error_hash.fetch('error').fetch('description').should == error_description
+              error_hash.fetch('error').fetch('code').should == error_code
+              error_hash.fetch('error').fetch('backtrace').should_not be_empty
+              error_hash.fetch('error').fetch('types').should include(
+                "VCAP::Services::Api::ServiceGatewayClient::ErrorResponse"
               )
+              error_hash.fetch('error').fetch('error').should == {
+                'backtrace' => backtrace,
+                'types' => types
+              }
             }
           end
 
@@ -266,17 +266,17 @@ module VCAP::Services::Api
               exception.error.description.should == error_description
               exception.error.error.fetch('backtrace').should == backtrace
               exception.error.error.fetch('types').should == types
-              exception.to_h.should include(
-                'status' => response_status_code,
-                'error' => {
-                  'description' => error_description,
-                  'code' => error_code,
-                  'error' => {
-                    'backtrace' => backtrace,
-                    'types' => types
-                  }
-                }
+              error_hash = exception.to_h
+              error_hash.fetch('error').fetch('description').should == error_description
+              error_hash.fetch('error').fetch('code').should == error_code
+              error_hash.fetch('error').fetch('backtrace').should_not be_empty
+              error_hash.fetch('error').fetch('types').should include(
+                "VCAP::Services::Api::ServiceGatewayClient::ErrorResponse"
               )
+              error_hash.fetch('error').fetch('error').should == {
+                'backtrace' => backtrace,
+                'types' => types
+              }
             }
           end
 
@@ -289,17 +289,17 @@ module VCAP::Services::Api
               exception.error.description.should == error_description
               exception.error.error.fetch('backtrace').should == backtrace
               exception.error.error.fetch('types').should == types
-              exception.to_h.should include(
-                'status' => response_status_code,
-                'error' => {
-                  'description' => error_description,
-                  'code' => error_code,
-                  'error' => {
-                    'backtrace' => backtrace,
-                    'types' => types
-                  }
-                }
+              error_hash = exception.to_h
+              error_hash.fetch('error').fetch('description').should == error_description
+              error_hash.fetch('error').fetch('code').should == error_code
+              error_hash.fetch('error').fetch('backtrace').should_not be_empty
+              error_hash.fetch('error').fetch('types').should include(
+                "VCAP::Services::Api::ServiceGatewayClient::ErrorResponse"
               )
+              error_hash.fetch('error').fetch('error').should == {
+                'backtrace' => backtrace,
+                'types' => types
+              }
             }
           end
         end

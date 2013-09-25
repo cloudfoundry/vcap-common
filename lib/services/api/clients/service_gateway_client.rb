@@ -39,10 +39,10 @@ module VCAP::Services::Api
 
       def to_h
         {
-          'backtrace' => backtrace,
-          'status' => status,
-          'types' => self.class.ancestors.map(&:name) - Exception.ancestors.map(&:name),
-          'error' => error.extract(stringify_keys: true)
+          'error' => error.extract(stringify_keys: true).merge(
+            'backtrace' => backtrace,
+            'types' => self.class.ancestors.map(&:name) - Exception.ancestors.map(&:name)
+          )
         }
       end
     end
