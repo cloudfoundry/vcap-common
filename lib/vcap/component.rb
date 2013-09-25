@@ -7,6 +7,7 @@ require "set"
 require "thin"
 require "yajl"
 require "vmstat"
+require "vcap/win_stats"
 
 module VCAP
 
@@ -96,8 +97,8 @@ module VCAP
           # Grab current cpu and memory usage
           if WINDOWS
             # memory
-            rss = windows_memory
-            pcpu = windows_cpu
+            rss = WinStats.process_memory
+            pcpu = WinStats.process_cpu
           else
             rss, pcpu = `ps -o rss=,pcpu= -p #{Process.pid}`.split
           end
@@ -110,11 +111,22 @@ module VCAP
             varz[:mem] = rss.to_i
             varz[:cpu] = pcpu.to_f
 
-            memory = Vmstat.memory
-            varz[:mem_used_bytes] = memory.active_bytes + memory.wired_bytes
-            varz[:mem_free_bytes] = memory.inactive_bytes + memory.free_bytes
+            if WINDOWS
+              mem = WinStats.memory_used
+              varz[:mem_used_bytes] = mem[:total] - mem[:available]
+              varz[:mem_free_bytes] = mem[:available]
+            else
+              memory = Vmstat.memory
+              varz[:mem_used_bytes] = memory.active_bytes + memory.wired_bytes
+              varz[:mem_free_bytes] = memory.inactive_bytes + memory.free_bytes
+            end
 
-            varz[:cpu_load_avg] = Vmstat.load_average.one_minute
+            if WINDOWS
+              varz[:cpu_load_avg] = WinStats.cpu_load
+            else
+              varz[:cpu_load_avg] = Vmstat.load_average.one_minute
+            end
+
 
             # Return duplicate while holding lock
             return varz.dup
@@ -236,52 +248,6 @@ module VCAP
         config
       end
 
-      private
-
-      def windows_memory
-        out_ary = memory_list.split
-        rss = out_ary[4].delete(',').to_i
-        rss
-      end
-
-      def memory_list
-        out_ary = %x[tasklist /nh /fi "pid eq #{Process.pid}"]
-        out_ary
-      end
-
-      def windows_cpu
-        pcpu = 0
-        process_ary = process_list
-        pid = Process.pid
-        idx_of_process = -1
-        process_line_ary = process_ary.split("\n")
-        ary_to_search = process_line_ary[2].split(",")
-        ary_to_search.each_with_index { |val, idx|
-          pid_s = val.gsub(/"/, '')
-          pid_to_i = pid_s.to_i
-          if (pid == pid_to_i)
-            idx_of_process = idx
-          end
-        }
-        if idx_of_process >= 0
-          cpu_ary = process_time
-          cpu_line_ary = cpu_ary.split("\n")
-          ary_to_search = cpu_line_ary[2].split(",")
-          cpu = ary_to_search[idx_of_process]
-          pcpu = cpu.gsub(/"/, '').to_f
-        end
-        pcpu
-      end
-
-      def process_list
-        process_str = %x[typeperf -sc 1 "\\Process(ruby*)\\ID Process"]
-        process_str
-      end
-
-      def process_time
-        cpu_ary = %x[typeperf -sc 1 "\\Process(ruby*)\\% processor time"]
-        cpu_ary
-      end
     end
   end
 end
