@@ -6,8 +6,7 @@ require "nats/client"
 require "set"
 require "thin"
 require "yajl"
-require "vmstat"
-require "vcap/win_stats"
+require "vcap/stats"
 
 module VCAP
 
@@ -94,14 +93,7 @@ module VCAP
         @last_varz_update ||= 0
 
         if Time.now.to_f - @last_varz_update >= 1
-          # Grab current cpu and memory usage
-          if WINDOWS
-            # memory
-            rss = WinStats.process_memory
-            pcpu = WinStats.process_cpu
-          else
-            rss, pcpu = `ps -o rss=,pcpu= -p #{Process.pid}`.split
-          end
+          rss, pcpu = Stats.process_memory_and_cpu
 
           # Update varz
           varz.synchronize do
@@ -111,22 +103,10 @@ module VCAP
             varz[:mem] = rss.to_i
             varz[:cpu] = pcpu.to_f
 
-            if WINDOWS
-              mem = WinStats.memory_used
-              varz[:mem_used_bytes] = mem[:total] - mem[:available]
-              varz[:mem_free_bytes] = mem[:available]
-            else
-              memory = Vmstat.memory
-              varz[:mem_used_bytes] = memory.active_bytes + memory.wired_bytes
-              varz[:mem_free_bytes] = memory.inactive_bytes + memory.free_bytes
-            end
+            varz[:mem_used_bytes] = Stats.memory_used_bytes
+            varz[:mem_free_bytes] = Stats.memory_free_bytes
 
-            if WINDOWS
-              varz[:cpu_load_avg] = WinStats.cpu_load
-            else
-              varz[:cpu_load_avg] = Vmstat.load_average.one_minute
-            end
-
+            varz[:cpu_load_avg] = Stats.cpu_load_average
 
             # Return duplicate while holding lock
             return varz.dup

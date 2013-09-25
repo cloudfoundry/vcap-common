@@ -78,20 +78,17 @@ describe VCAP::Component do
   end
 
   describe '.updated_varz' do
-
     before do
-      stub_const('VCAP::WINDOWS', true)
       EventMachine.stub(:reactor_running?).and_return(true)
       VCAP::Component.stub(:start_http_server)
       VCAP::Component.register(:nats => nats)
-      VCAP::WinStats.stub(:process_memory).and_return(55792)
-      VCAP::WinStats.stub(:process_cpu).and_return(12)
-      VCAP::WinStats.stub(:cpu_load).and_return(24)
-      mem = Hash.new
-      mem[:total] = 8588886016
-      mem[:available] = 6189744128
-      VCAP::WinStats.stub(:memory_used).and_return(mem)
-      Process.stub(pid: 9999)
+
+      VCAP::Stats.stub(
+        :process_memory_and_cpu => [55792, 12],
+        :memory_used_bytes => 2399141888,
+        :memory_free_bytes => 6189744128,
+        :cpu_load_average => 24
+      )
     end
 
     it 'includes memory/cpu/avg cpu load information' do

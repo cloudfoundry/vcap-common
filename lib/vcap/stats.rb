@@ -1,9 +1,50 @@
 require 'vcap/common'
+require 'vmstat'
 
 module VCAP
-  class WinStats
+  class Stats
     class << self
-      def memory_used
+      def process_memory_and_cpu
+        if WINDOWS
+          rss = windows_process_memory
+          pcpu = windows_process_cpu
+        else
+          rss, pcpu = `ps -o rss=,pcpu= -p #{Process.pid}`.split
+        end
+        [rss, pcpu]
+      end
+
+      def memory_used_bytes
+        if WINDOWS
+          mem = windows_memory_used
+          mem[:total] - mem[:available]
+        else
+          mem = Vmstat.memory
+          mem.active_bytes + mem.wired_bytes
+        end
+      end
+
+      def memory_free_bytes
+        if WINDOWS
+          mem = windows_memory_used
+          mem[:available]
+        else
+          mem = Vmstat.memory
+          mem.inactive_bytes + mem.free_bytes
+        end
+      end
+
+      def cpu_load_average
+        if WINDOWS
+          windows_cpu_load
+        else
+          Vmstat.load_average.one_minute
+        end
+      end
+
+      private
+
+      def windows_memory_used
         mem_ary = system_memory_list.split
         mem = Hash.new
         mem[:total] = (mem_ary[3].gsub(',', '').to_i * 1024) * 1024
@@ -11,17 +52,17 @@ module VCAP
         mem
       end
 
-      def cpu_load
+      def windows_cpu_load
         avg_load = %x[powershell -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned "Get-WmiObject win32_processor | Measure-Object -property LoadPercentage -Average | Foreach {$_.Average}"]
         avg_load.to_i
       end
 
-      def process_memory
+      def windows_process_memory
         out_ary = memory_list.split
-        rss = out_ary[4].delete(',').to_i
+        out_ary[4].delete(',').to_i
       end
 
-      def process_cpu
+      def windows_process_cpu
         pcpu = 0
         process_ary = process_list
         pid = Process.pid
@@ -45,22 +86,20 @@ module VCAP
         pcpu
       end
 
-      private
-
       def system_memory_list
-        mem_ary = %x[systeminfo | findstr "\\<Physical Memory>\\"]
+        %x[systeminfo | findstr "\\<Physical Memory>\\"]
       end
 
       def memory_list
-        out_ary = %x[tasklist /nh /fi "pid eq #{Process.pid}"]
+        %x[tasklist /nh /fi "pid eq #{Process.pid}"]
       end
 
       def process_time
-        cpu_ary = %x[typeperf -sc 1 "\\Process(ruby*)\\% processor time"]
+        %x[typeperf -sc 1 "\\Process(ruby*)\\% processor time"]
       end
 
       def process_list
-        process_str = %x[typeperf -sc 1 "\\Process(ruby*)\\ID Process"]
+        %x[typeperf -sc 1 "\\Process(ruby*)\\ID Process"]
       end
     end
   end
