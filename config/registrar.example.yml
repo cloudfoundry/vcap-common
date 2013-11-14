@@ -1,7 +1,8 @@
 ---
 logging:
   level: all
-mbus: nats://localhost:4222
+message_bus_servers:
+  - nats://localhost:4222
 uri: test.vcap.me
 # Alternatively, multiple urls are support like so
 # uri:

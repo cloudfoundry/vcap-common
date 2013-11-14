@@ -12,7 +12,7 @@ module Cf
     ROUTER_REGISTER_TOPIC = "router.register"
     ROUTER_UNREGISTER_TOPIC = "router.unregister"
 
-    attr_reader :logger, :message_bus_uri, :type, :host, :port,
+    attr_reader :logger, :message_bus_servers, :type, :host, :port,
                 :username, :password, :uri, :tags, :uuid, :index, :private_instance_id
 
     def initialize(config)
@@ -20,7 +20,7 @@ module Cf
 
       config = symbolize_keys(config)
 
-      @message_bus_uri = config[:mbus]
+      @message_bus_servers = config[:message_bus_servers]
       @host = config[:host]
       @port = config[:port]
       @uri = config[:uri]
@@ -90,7 +90,7 @@ module Cf
 
     def message_bus
       @message_bus ||= CfMessageBus::MessageBus.new(
-        uri: message_bus_uri,
+        servers: message_bus_servers,
         logger: logger)
     end
 
@@ -103,7 +103,7 @@ module Cf
       logger.info("Sending unregistration: #{registry_message}")
       message_bus.publish(ROUTER_UNREGISTER_TOPIC, registry_message, &block)
     end
-    
+
     def registry_message
       {
         :host => host,

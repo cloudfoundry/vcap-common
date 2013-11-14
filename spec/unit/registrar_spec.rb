@@ -7,7 +7,7 @@ module Cf
     let(:bus_uri) { "a message bus uri" }
     let(:logger) { double(:logger, info: nil, error: nil, debug: nil) }
     let(:config) do
-      { mbus: bus_uri,
+      { message_bus_servers: [bus_uri],
         host: "registrar.host",
         port: 98765,
         uri: "fancyuri",
@@ -37,10 +37,10 @@ module Cf
     subject { described_class.new(config) }
 
     describe ".new" do
-      let(:config) { { mbus: "m", host: "h", port: "p", uri: "u", tags: "t", index: 1, private_instance_id: "monkey" } }
+      let(:config) { { message_bus_servers: ["m"], host: "h", port: "p", uri: "u", tags: "t", index: 1, private_instance_id: "monkey" } }
 
       its(:logger) { should be_a Steno::Logger }
-      its(:message_bus_uri) { should eq "m" }
+      its(:message_bus_servers) { should eq(["m"]) }
       its(:host) { should eq "h" }
       its(:port) { should eq "p" }
       its(:uri) { should eq "u" }
@@ -49,7 +49,7 @@ module Cf
       its(:private_instance_id) { should eq "monkey" }
 
       context "when the index is not provided" do
-        let(:config) { { mbus: "m", host: "h", port: "p", uri: "u", tags: "t" } }
+        let(:config) { { message_bus_servers: ["m"], host: "h", port: "p", uri: "u", tags: "t" } }
 
         its(:index) { should eq 0 }
       end
@@ -88,7 +88,7 @@ module Cf
 
     describe "#register_with_router" do
       it "creates the message bus correctly with logger" do
-        CfMessageBus::MessageBus.should_receive(:new).with(uri: bus_uri, logger: subject.logger)
+        CfMessageBus::MessageBus.should_receive(:new).with(servers: [bus_uri], logger: subject.logger)
         subject.register_with_router
       end
 

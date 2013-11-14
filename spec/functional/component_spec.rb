@@ -100,7 +100,7 @@ describe VCAP::Component, unix_only: true do
       em do
         options = { :type => 'suppress_test', :nats => nats }
         options[:config] = {
-            :mbus => 'nats://user:pass@localhost:4223',
+            :message_bus_servers => ['nats://user:pass@localhost:4223'],
             :keys => 'sekret!keys',
             :password => 'crazy',
             :pass => 'crazy',
@@ -117,7 +117,7 @@ describe VCAP::Component, unix_only: true do
       em do
         options = { :type => 'suppress_test', :nats => nats }
         options[:config] = {
-            :mbus => 'nats://user:pass@localhost:4223',
+            :message_bus_servers => ['nats://user:pass@localhost:4223'],
             :keys => 'sekret!keys',
             :password => 'crazy',
             :pass => 'crazy',
@@ -134,7 +134,7 @@ describe VCAP::Component, unix_only: true do
       em do
         options = { :type => 'suppress_test', :nats => nats }
         options[:config] = {
-            :mbus => 'nats://user:pass@localhost:4223',
+            :message_bus_servers => ['nats://user:pass@localhost:4223'],
             :keys => 'sekret!keys',
             :mysql => { :user => 'derek', :password => 'sekret!', :pass => 'sekret!' },
             :password => 'crazy',
@@ -145,7 +145,7 @@ describe VCAP::Component, unix_only: true do
         VCAP::Component.register(options)
 
         options.should include(:config => {
-            :mbus => 'nats://user:pass@localhost:4223',
+            :message_bus_servers => ['nats://user:pass@localhost:4223'],
             :keys => 'sekret!keys',
             :mysql => { :user => 'derek', :password => 'sekret!', :pass => 'sekret!' },
             :password => 'crazy',
