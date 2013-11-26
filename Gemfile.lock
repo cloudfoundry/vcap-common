@@ -64,7 +64,7 @@ GEM
       debugger-linecache (~> 1.2.0)
       debugger-ruby_core_source (~> 1.2.3)
     debugger-linecache (1.2.0)
-    debugger-ruby_core_source (1.2.3)
+    debugger-ruby_core_source (1.2.4)
     descendants_tracker (0.0.3)
     diff-lcs (1.2.5)
     em-http-request (1.1.1)
