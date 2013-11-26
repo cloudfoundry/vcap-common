@@ -12,7 +12,7 @@ describe VCAP::ProcessUtils do
     end
 
     it "should return nil if the process isn't running", unix_only: true do
-      Open3.stub!(:capture3).and_return(['', '', 1])
+      Open3.stub(:capture3).and_return(['', '', 1])
       stats = VCAP::ProcessUtils.get_stats(12345)
       stats.should be_nil
     end
