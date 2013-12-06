@@ -6,15 +6,17 @@ describe VCAP::Subprocess do
   end
 
   describe '#run' do
-    it 'should capture both stdout and stderr', unix_only: true do
-      stdout, stderr, status = @subprocess.run('echo foo >&2')
-      stdout.should == ""
-      stderr.should == "foo\n"
-      status.should == 0
-
+    it 'should capture stdout stderr', unix_only: true do
       stdout, stderr, status = @subprocess.run('echo foo')
       stdout.should == "foo\n"
       stderr.should == ""
+      status.should == 0
+    end
+
+    it 'should capture stderr', unix_only: true do
+      stdout, stderr, status = @subprocess.run('echo foo >&2')
+      stdout.should == ""
+      stderr.should == "foo\n"
       status.should == 0
     end
 
@@ -36,9 +38,7 @@ describe VCAP::Subprocess do
     end
 
     it 'should kill processes that run too long', unix_only: true do
-      expect do
-        VCAP::Subprocess.run('sleep 5', 0, 1)
-      end.to raise_error(VCAP::SubprocessTimeoutError)
+      expect { VCAP::Subprocess.run('sleep 5', 0, 1) }.to raise_error(VCAP::SubprocessTimeoutError)
     end
 
     it 'should call previously installed SIGCHLD handlers', unix_only: true do
