@@ -90,7 +90,7 @@ describe JsonMessage do
     it 'should define the field to be optional' do
       @klass.optional :optional, String
       msg = @klass.new
-      expect { msg.encode }.to_not raise_error(JsonMessage::ValidationError)
+      expect { msg.encode }.to_not raise_error
     end
 
     it 'should define a default value' do
