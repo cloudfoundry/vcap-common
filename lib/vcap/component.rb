@@ -49,40 +49,44 @@ module VCAP
     # We will suppress these from normal varz reporting by default.
     CONFIG_SUPPRESS = Set.new([:message_bus_servers, :mbus, :service_mbus, :keys, :database_environment, :password, :pass, :token])
 
-    class << self
-      class SafeHash < BasicObject
-        def initialize(hash = {})
-          @hash = hash
-        end
+    class SafeHash < BasicObject
+      def initialize(hash = {})
+        @hash = hash
+      end
 
-        def threadsafe!
-          @monitor = ::Monitor.new
-        end
+      def class
+        SafeHash
+      end
 
-        def synchronize
-          if @monitor
-            @monitor.synchronize do
-              begin
-                @thread = ::Thread.current
-                yield
-              ensure
-                @thread = nil
-              end
+      def threadsafe!
+        @monitor = ::Monitor.new
+      end
+
+      def synchronize
+        if @monitor
+          @monitor.synchronize do
+            begin
+              @thread = ::Thread.current
+              yield
+            ensure
+              @thread = nil
             end
-          else
-            yield
           end
-        end
-
-        def method_missing(sym, *args, &blk)
-          if @monitor && @thread != ::Thread.current
-            ::Kernel.raise "Lock required"
-          end
-
-          @hash.__send__(sym, *args, &blk)
+        else
+          yield
         end
       end
 
+      def method_missing(sym, *args, &blk)
+        if @monitor && @thread != ::Thread.current
+          ::Kernel.raise "Lock required"
+        end
+
+        @hash.__send__(sym, *args, &blk)
+      end
+    end
+
+    class << self
       def varz
         @varz ||= SafeHash.new
       end
