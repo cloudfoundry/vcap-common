@@ -2,5 +2,6 @@ source "http://rubygems.org"
 
 gemspec
 
-gem "vcap-concurrency", :github => "cloudfoundry/vcap-concurrency"
-gem "cf-message-bus", :github => "cloudfoundry/cf-message-bus"
+
+gem "vcap-concurrency", :git => "http://github.com/cloudfoundry/vcap-concurrency.git"
+gem "cf-message-bus", :git => "http://github.com/cloudfoundry/cf-message-bus.git"
