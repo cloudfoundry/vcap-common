@@ -129,6 +129,8 @@ module VCAP
         required :label,         String
         required :email,         String
         required :binding_options
+
+        optional :app_id,        String
       end
 
       class GatewayUnbindRequest < JsonMessage
