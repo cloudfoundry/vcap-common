@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_dependency('squash_ruby')
   s.add_dependency('addressable', '~> 2.2')
   s.add_dependency('steno')
-  s.add_development_dependency('rake', '~> 0.9.2')
+  s.add_development_dependency('rake')
   s.add_development_dependency('rspec')
   s.add_development_dependency('sinatra')
   s.add_development_dependency('webmock')
