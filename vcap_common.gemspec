@@ -1,14 +1,14 @@
-require File.expand_path("../lib/cf/version", __FILE__)
+require File.expand_path('../lib/cf/version', __FILE__)
 
 Gem::Specification.new do |s|
   s.name = 'vcap_common'
   s.version = Cf::VERSION.dup
   s.summary = 'vcap common'
-  s.homepage = "http://github.com/cloudfoundry/vcap-common"
+  s.homepage = 'http://github.com/cloudfoundry/vcap-common'
   s.description = 'common vcap classes/methods'
 
-  s.authors = ["Cloud Foundry Core Team"]
-  s.email = ["vcap-dev@googlegroups.com"]
+  s.authors = ['Cloud Foundry Core Team']
+  s.email = ['vcap-dev@googlegroups.com']
 
   s.add_dependency('eventmachine')
   s.add_dependency('thin')
@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency('uuidtools')
   s.add_dependency('vmstat', '~> 2.0')
   s.add_dependency('squash_ruby')
-  s.add_dependency('addressable', "~> 2.2")
+  s.add_dependency('addressable', '~> 2.2')
   s.add_dependency('steno')
   s.add_development_dependency('rake', '~> 0.9.2')
   s.add_development_dependency('rspec')
@@ -33,5 +33,5 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib']
 
-  s.files = Dir["lib/**/*.rb"]
+  s.files = Dir['lib/**/*.rb']
 end
