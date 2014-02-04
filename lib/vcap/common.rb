@@ -55,7 +55,7 @@ module VCAP
     if RUBY_PLATFORM =~ /linux/
       return `cat /proc/cpuinfo | grep processor | wc -l`.to_i
     elsif RUBY_PLATFORM =~ /darwin/
-      `hwprefs cpu_count`.strip.to_i
+      `sysctl -n hw.ncpu`.strip.to_i
     elsif RUBY_PLATFORM =~ /freebsd|netbsd/
       `sysctl hw.ncpu`.strip.to_i
     elsif WINDOWS
