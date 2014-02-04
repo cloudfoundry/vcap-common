@@ -59,15 +59,6 @@ describe VCAP do
           expect(VCAP.num_cores).to eq 4
         end
       end
-
-      context 'when hwprefs is not available' do
-        it 'returns default number of cores' do
-          stub_const('RUBY_PLATFORM', 'x86_64 darwin')
-          subject.should_receive(:'`').with('sysctl -n hw.ncpu').and_raise(Errno::ENOENT)
-          expect(VCAP.num_cores).to eq 1
-        end
-      end
-
     end
 
     describe 'freebsd' do
@@ -117,6 +108,13 @@ describe VCAP do
       end
     end
 
+    context 'when the command fails' do
+      it 'returns default number of cores' do
+        stub_const('RUBY_PLATFORM', 'x86_64 darwin')
+        subject.should_receive(:'`').with('sysctl -n hw.ncpu').and_raise(Errno::ENOENT)
+        expect(VCAP.num_cores).to eq 1
+      end
+    end
   end
 
   describe '.process_running?' do

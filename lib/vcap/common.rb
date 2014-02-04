@@ -64,7 +64,6 @@ module VCAP
       return 1 # unknown..
     end
   rescue
-    # hwprefs doesn't always exist, and so the block above can fail.
     # In any case, let's always assume that there is 1 core
     1
   end
