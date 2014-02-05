@@ -182,7 +182,7 @@ module VCAP
         varz.synchronize do
           varz.merge!(@discover.dup)
           varz[:num_cores] = VCAP.num_cores
-          varz[:config] = sanitize_config(opts[:config]) if opts[:config]
+          #varz[:config] = sanitize_config(opts[:config]) if opts[:config]
           varz[:log_counts] = log_counter if log_counter
         end
 
