@@ -1,11 +1,7 @@
-# Copyright (c) 2009-2012 VMware, Inc.
-
 require "spec_helper"
-
 require "vcap/component"
 
 describe VCAP::Component do
-
   let(:nats) do
     nats_mock = double("nats")
     nats_mock.stub(:subscribe)
@@ -29,13 +25,8 @@ describe VCAP::Component do
     end
   end
 
-  before do
-    cleanup
-  end
-
-  after do
-    cleanup
-  end
+  before { cleanup }
+  after { cleanup }
 
   describe "regular #varz" do
     it "should not raise on get" do
@@ -84,17 +75,17 @@ describe VCAP::Component do
       VCAP::Component.register(:nats => nats)
 
       VCAP::Stats.stub(
-        :process_memory_and_cpu => [55792, 12],
+        :process_memory_bytes_and_cpu => [1024, 12],
         :memory_used_bytes => 2399141888,
         :memory_free_bytes => 6189744128,
-        :cpu_load_average => 24
+        :cpu_load_average => 24,
       )
     end
 
     it 'includes memory/cpu/avg cpu load information' do
-      expect(VCAP::Component.updated_varz[:mem]).to eq 55792
       expect(VCAP::Component.updated_varz[:cpu].should).to eq 12
       expect(VCAP::Component.updated_varz[:cpu_load_avg]).to eq 24
+      expect(VCAP::Component.updated_varz[:mem_bytes]).to eq 1024
       expect(VCAP::Component.updated_varz[:mem_used_bytes]).to eq 2399141888
       expect(VCAP::Component.updated_varz[:mem_free_bytes]).to eq 6189744128
     end

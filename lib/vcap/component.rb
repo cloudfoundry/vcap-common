@@ -97,20 +97,19 @@ module VCAP
         @last_varz_update ||= 0
 
         if Time.now.to_f - @last_varz_update >= 1
-          rss, pcpu = Stats.process_memory_and_cpu
+          rss_bytes, pcpu = Stats.process_memory_bytes_and_cpu
 
           # Update varz
           varz.synchronize do
             @last_varz_update = Time.now.to_f
 
             varz[:uptime] = VCAP.uptime_string(Time.now - varz[:start])
-            varz[:mem] = rss.to_i
             varz[:cpu] = pcpu.to_f
+            varz[:cpu_load_avg] = Stats.cpu_load_average
 
+            varz[:mem_bytes] = rss_bytes.to_i
             varz[:mem_used_bytes] = Stats.memory_used_bytes
             varz[:mem_free_bytes] = Stats.memory_free_bytes
-
-            varz[:cpu_load_avg] = Stats.cpu_load_average
 
             # Return duplicate while holding lock
             return varz.dup

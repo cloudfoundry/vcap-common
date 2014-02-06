@@ -4,14 +4,15 @@ require 'vmstat'
 module VCAP
   class Stats
     class << self
-      def process_memory_and_cpu
+      def process_memory_bytes_and_cpu
         if WINDOWS
-          rss = windows_process_memory
+          rss_bytes = windows_process_memory * 1024
           pcpu = windows_process_cpu
         else
-          rss, pcpu = `ps -o rss=,pcpu= -p #{Process.pid}`.split
+          rss, pcpu = `ps -o rss=,pcpu= -p #{Process.pid}`.split.map(&:to_i)
+          rss_bytes = rss * 1024
         end
-        [rss, pcpu]
+        [rss_bytes, pcpu]
       end
 
       def memory_used_bytes

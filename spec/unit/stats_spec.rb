@@ -12,9 +12,9 @@ describe VCAP::Stats do
     it "should retrieve process memory and cpu" do
       VCAP::Stats.should_receive(:'`').with("ps -o rss=,pcpu= -p 9999").and_return("55792 12")
 
-      mem, cpu = VCAP::Stats.process_memory_and_cpu
-      expect(mem).to eq("55792")
-      expect(cpu).to eq("12")
+      mem_bytes, cpu = VCAP::Stats.process_memory_bytes_and_cpu
+      expect(mem_bytes).to eq(55792 * 1024)
+      expect(cpu).to eq(12)
     end
 
     it "should retrieve cpu_load" do
@@ -81,9 +81,9 @@ LIST
       VCAP::Stats.should_receive(:'`').with('typeperf -sc 1 "\\Process(ruby*)\\ID Process"').and_return(process_list)
       VCAP::Stats.should_receive(:'`').with('typeperf -sc 1 "\\Process(ruby*)\\% processor time"').and_return(process_time)
 
-      mem, cpu = VCAP::Stats.process_memory_and_cpu
-      expect(mem).to eq 55792
-      expect(cpu).to eq 12
+      mem_bytes, cpu = VCAP::Stats.process_memory_bytes_and_cpu
+      expect(mem_bytes).to eq(55792 * 1024)
+      expect(cpu).to eq(12)
     end
 
     it 'should retrieve cpu_load' do
