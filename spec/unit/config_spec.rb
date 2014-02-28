@@ -10,8 +10,8 @@ describe VCAP::Config do
         end
       end
 
-      MyConfig.schema.should be_instance_of(Membrane::Schema::List)
-      MyConfig.schema.elem_schema.should be_instance_of(Membrane::Schema::Class)
+      MyConfig.schema.should be_instance_of(Membrane::Schemas::List)
+      MyConfig.schema.elem_schema.should be_instance_of(Membrane::Schemas::Class)
       MyConfig.schema.elem_schema.klass.should == Integer
     end
   end
