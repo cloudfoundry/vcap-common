@@ -95,67 +95,14 @@ describe VCAP::Component, unix_only: true do
     end
   end
 
-  describe 'suppression of keys in config information in varz' do
-    it 'should suppress certain keys in the top level config' do
-      em do
-        options = { :type => 'suppress_test', :nats => nats }
-        options[:config] = {
-            :message_bus_servers => ['nats://user:pass@localhost:4223'],
-            :keys => 'sekret!keys',
-            :password => 'crazy',
-            :pass => 'crazy',
-            :database_environment => { :stuff => 'should not see' },
-            :token => 't0ken'
-        }
-        VCAP::Component.register(options)
-        done
-      end
-      VCAP::Component.varz.should include(:config => {})
+  it 'does not allow publishing of :config' do
+    em do
+      options = { :type => 'suppress_test', :nats => nats }
+      options[:config] = "fake config"
+      expect { VCAP::Component.register(options) }.to raise_error(ArgumentError, /config/i)
+      done
     end
-
-    it 'should suppress certain keys at any level in config' do
-      em do
-        options = { :type => 'suppress_test', :nats => nats }
-        options[:config] = {
-            :message_bus_servers => ['nats://user:pass@localhost:4223'],
-            :keys => 'sekret!keys',
-            :password => 'crazy',
-            :pass => 'crazy',
-            :database_environment => { :stuff => 'should not see' },
-            :this_is_ok => { :password => 'sekret!', :pass => 'sekret!', :test => 'ok', :token => 't0ken'}
-        }
-        VCAP::Component.register(options)
-        done
-      end
-      VCAP::Component.varz.should include(:config => { :this_is_ok => { :test => 'ok'}} )
-    end
-
-    it 'should leave config its passed untouched' do
-      em do
-        options = { :type => 'suppress_test', :nats => nats }
-        options[:config] = {
-            :message_bus_servers => ['nats://user:pass@localhost:4223'],
-            :keys => 'sekret!keys',
-            :mysql => { :user => 'derek', :password => 'sekret!', :pass => 'sekret!' },
-            :password => 'crazy',
-            :pass => 'crazy',
-            :database_environment => { :stuff => 'should not see' },
-            :this_is_ok => { :password => 'sekret!', :pass => 'sekret!', :mysql => 'sekret!', :test => 'ok', :token => 't0ken'}
-        }
-        VCAP::Component.register(options)
-
-        options.should include(:config => {
-            :message_bus_servers => ['nats://user:pass@localhost:4223'],
-            :keys => 'sekret!keys',
-            :mysql => { :user => 'derek', :password => 'sekret!', :pass => 'sekret!' },
-            :password => 'crazy',
-            :pass => 'crazy',
-            :database_environment => { :stuff => 'should not see' },
-            :this_is_ok => { :password => 'sekret!', :pass => 'sekret!', :mysql => 'sekret!', :test => 'ok', :token => 't0ken'}
-        })
-        done
-      end
-    end
+    VCAP::Component.varz.should_not have_key(:config)
   end
 
   describe "http endpoint" do

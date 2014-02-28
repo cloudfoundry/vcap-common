@@ -45,10 +45,6 @@ module VCAP
 
   # Common component setup for discovery and monitoring
   class Component
-
-    # We will suppress these from normal varz reporting by default.
-    CONFIG_SUPPRESS = Set.new([:message_bus_servers, :mbus, :service_mbus, :keys, :database_environment, :password, :pass, :token])
-
     class SafeHash < BasicObject
       def initialize(hash = {})
         @hash = hash
@@ -156,6 +152,8 @@ module VCAP
       # Returns the published configuration of the component,
       # including the ephemeral port and credentials.
       def register(opts)
+        disallow_exposing_of_config!(opts)
+
         uuid = VCAP.secure_uuid
         type = opts[:type]
         index = opts[:index]
@@ -181,7 +179,6 @@ module VCAP
         varz.synchronize do
           varz.merge!(@discover.dup)
           varz[:num_cores] = VCAP.num_cores
-          varz[:config] = sanitize_config(opts[:config]) if opts[:config]
           varz[:log_counts] = log_counter if log_counter
         end
 
@@ -209,28 +206,11 @@ module VCAP
         @discover[:uptime] = VCAP.uptime_string(Time.now - @discover[:start])
       end
 
-      def clear_level(h)
-        h.each do |k, v|
-          if CONFIG_SUPPRESS.include?(k.to_sym)
-            h.delete(k)
-          else
-            clear_level(h[k]) if v.instance_of? Hash
-          end
-        end
-      end
+      private
 
-      def sanitize_config(config)
-        # Can't Marshal/Deep Copy logger instances that services use
-        if config[:logger]
-          config = config.dup
-          config.delete(:logger)
-        end
-        # Deep copy
-        config = Marshal.load(Marshal.dump(config))
-        clear_level(config)
-        config
+      def disallow_exposing_of_config!(opts)
+        raise ArgumentError.new("Exposing the config is a security concern, and disallowed.") if opts.has_key?(:config)
       end
-
     end
   end
 end
