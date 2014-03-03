@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency('membrane', '~> 1.0')
   s.add_dependency('httpclient')
   s.add_dependency('em-http-request', '~> 1.0')
+  s.add_dependency('cookiejar', '<= 0.3.0')
   s.add_dependency('multipart-post')
   s.add_dependency('mime-types')
   s.add_dependency('uuidtools')
