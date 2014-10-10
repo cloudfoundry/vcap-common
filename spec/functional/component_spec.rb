@@ -1,8 +1,10 @@
+# encoding: UTF-8
 # Copyright (c) 2009-2011 VMware, Inc.
 require "spec_helper"
 require "vcap/spec/em"
 require "em-http/version"
-require 'webmock'
+require "webmock"
+require "json"
 
 describe VCAP::Component, unix_only: true do
   include VCAP::Spec::EM
@@ -15,7 +17,7 @@ describe VCAP::Component, unix_only: true do
     NATS.connect(:uri => "nats://localhost:4223", :autostart => true)
   end
 
-  let(:default_options) { { :type => "type", :nats => nats } }
+  let(:default_options) { {:type => "type", :nats => nats} }
 
   after :all do
     if File.exists? NATS::AUTOSTART_PID_FILE
@@ -97,7 +99,7 @@ describe VCAP::Component, unix_only: true do
 
   it 'does not allow publishing of :config' do
     em do
-      options = { :type => 'suppress_test', :nats => nats }
+      options = {:type => 'suppress_test', :nats => nats}
       options[:config] = "fake config"
       expect { VCAP::Component.register(options) }.to raise_error(ArgumentError, /config/i)
       done
@@ -107,7 +109,7 @@ describe VCAP::Component, unix_only: true do
 
   describe "http endpoint" do
     let(:host) { VCAP::Component.varz[:host] }
-    let(:authorization) { { :head => { "authorization" => VCAP::Component.varz[:credentials] } } }
+    let(:authorization) { {:head => {"authorization" => VCAP::Component.varz[:credentials]}} }
 
     it "should let you specify the port" do
       em do
@@ -135,15 +137,18 @@ describe VCAP::Component, unix_only: true do
         request.callback do
           request.response_header.status.should == 200
           content_length = request.response_header['CONTENT_LENGTH'].to_i
+          valid_json?(request.response).should == true
 
-          VCAP::Component.varz[:var] = 'var'
+          VCAP::Component.varz[:var] = '♳♴♵♶♷'
+          VCAP::Component.varz[:var].length.should_not == VCAP::Component.varz[:var].bytesize
 
           request2 = make_em_httprequest(:get, host, "/varz", authorization)
           request2.callback do
             request2.response_header.status.should == 200
             content_length2 = request2.response_header['CONTENT_LENGTH'].to_i
             content_length2.should == request2.response.length
-            content_length2.should > content_length
+            content_length2.should >= content_length + VCAP::Component.varz[:var].length
+            valid_json?(request2.response).should == true
             done
           end
         end
@@ -160,14 +165,15 @@ describe VCAP::Component, unix_only: true do
         request.callback do
           request.response_header.status.should == 200
 
-          VCAP::Component.healthz = 'healthz'
+          VCAP::Component.healthz = "∑:healthz†"
 
           request2 = make_em_httprequest(:get, host, "/healthz", authorization)
           request2.callback do
             request2.response_header.status.should == 200
             content_length2 = request2.response_header['CONTENT_LENGTH'].to_i
             content_length2.should == request2.response.length
-            content_length2.should == 'healthz'.length
+            content_length2.should == "∑:healthz†".bytesize
+            request2.response.force_encoding("utf-8").should == '∑:healthz†'
             done
           end
         end
@@ -208,7 +214,7 @@ describe VCAP::Component, unix_only: true do
       em do
         VCAP::Component.register(default_options)
 
-        request = make_em_httprequest(:get, host, "/varz", :head => { "authorization" => "foo" })
+        request = make_em_httprequest(:get, host, "/varz", :head => {"authorization" => "foo"})
         request.callback do
           request.response_header.status.should == 400
           done
@@ -219,5 +225,12 @@ describe VCAP::Component, unix_only: true do
 
   def make_em_httprequest(method, host, path, opts={})
     ::EM::HttpRequest.new("http://#{host}#{path}").send(method, opts)
+  end
+
+  def valid_json?(body)
+    JSON.parse(body)
+    return true
+  rescue JSON::ParserError => pe
+    return false
   end
 end

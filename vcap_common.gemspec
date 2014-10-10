@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency('addressable', '~> 2.2')
   s.add_dependency('steno')
   s.add_development_dependency('rake')
-  s.add_development_dependency('rspec')
+  s.add_development_dependency('rspec', '< 3.0.0')
   s.add_development_dependency('sinatra')
   s.add_development_dependency('webmock')
   s.add_development_dependency('debugger')

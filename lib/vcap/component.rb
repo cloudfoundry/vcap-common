@@ -21,7 +21,7 @@ module VCAP
     def call(env)
       @logger.debug "varz access"
       varz = Yajl::Encoder.encode(Component.updated_varz, :pretty => true, :terminator => "\n")
-      [200, { 'Content-Type' => 'application/json', 'Content-Length' => varz.length.to_s }, varz]
+      [200, { 'Content-Type' => 'application/json', 'Content-Length' => varz.bytesize.to_s }, varz]
     rescue => e
       @logger.error "varz error #{e.inspect} #{e.backtrace.join("\n")}"
       raise e
@@ -36,7 +36,7 @@ module VCAP
     def call(env)
       @logger.debug "healthz access"
       healthz = Component.updated_healthz
-      [200, { 'Content-Type' => 'application/json', 'Content-Length' => healthz.length.to_s }, healthz]
+      [200, { 'Content-Type' => 'application/json', 'Content-Length' => healthz.bytesize.to_s }, healthz]
     rescue => e
       @logger.error "healthz error #{e.inspect} #{e.backtrace.join("\n")}"
       raise e
