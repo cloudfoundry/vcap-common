@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.add_dependency('eventmachine')
   s.add_dependency('thin')
   s.add_dependency('yajl-ruby')
-  s.add_dependency('nats', '>= 0.5.0.beta.12', '< 0.6')
+  s.add_dependency('nats', '>= 0.5.0.beta.16', '< 0.6')
   s.add_dependency('posix-spawn', '~> 0.3.6')
   s.add_dependency('membrane', '~> 1.0')
   s.add_dependency('httpclient')
