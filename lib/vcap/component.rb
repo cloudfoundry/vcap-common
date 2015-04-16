@@ -157,6 +157,7 @@ module VCAP
         uuid = VCAP.secure_uuid
         type = opts[:type]
         index = opts[:index]
+        job_name = opts[:job_name]
         uuid = "#{index}-#{uuid}" if index
         host = opts[:host] || VCAP.local_ip
         port = opts[:port] || VCAP.grab_ephemeral_port
@@ -174,6 +175,7 @@ module VCAP
           :credentials => auth,
           :start => Time.now
         }
+        @discover[:job_name] = job_name if job_name
 
         # Varz is customizable
         varz.synchronize do

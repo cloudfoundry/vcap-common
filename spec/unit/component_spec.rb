@@ -5,7 +5,6 @@ describe VCAP::Component do
   let(:nats) do
     nats_mock = double("nats")
     nats_mock.stub(:subscribe)
-    nats_mock.stub(:publish)
     nats_mock
   end
 
@@ -57,22 +56,60 @@ describe VCAP::Component do
   end
 
   describe "register" do
-    it "adds log_counter to varz when passed as an option" do
+    before do
       EventMachine.stub(:reactor_running?).and_return(true)
       VCAP::Component.stub(:start_http_server)
+    end
 
+    it "adds log_counter to varz when passed as an option" do
+      allow(nats).to receive(:publish).with(any_args)
       foo = Object.new
       options = {:log_counter => foo, :nats => nats}
       VCAP::Component.register(options)
       expect(VCAP::Component.varz[:log_counts]).to eq foo
     end
+
+    context "when job_name is specified" do
+      it "includes job_name in message" do
+        allow(Time).to receive(:now) { '2015-04-16 13:32:22 +0200' }
+        discover = {
+          :type => nil,
+          :index => nil,
+          :uuid => 'uuid',
+          :host => "host:port",
+          :credentials => [ 'uuid', 'uuid' ],
+          :start => Time.now,
+          :job_name => 'jobname'
+        }
+        allow(VCAP).to receive(:secure_uuid) { 'uuid'}
+        options = {:nats => nats, :host => 'host', :port => 'port', :job_name => 'jobname'}
+        expect(nats).to receive(:publish).with(anything, discover.to_json)
+        VCAP::Component.register(options)
+      end
+    end
+
+    context "when job_name is not specified" do
+      it "does not include job_name in message" do
+        allow(Time).to receive(:now) { '2015-04-16 13:32:22 +0200' }
+        discover = {
+          :type => nil,
+          :index => nil,
+          :uuid => 'uuid',
+          :host => "host:port",
+          :credentials => [ 'uuid', 'uuid' ],
+          :start => Time.now
+        }
+        allow(VCAP).to receive(:secure_uuid) { 'uuid'}
+        options = {:nats => nats, :host => 'host', :port => 'port'}
+        expect(nats).to receive(:publish).with(anything, discover.to_json)
+        VCAP::Component.register(options)
+      end
+    end
   end
 
   describe '.updated_varz' do
     before do
-      EventMachine.stub(:reactor_running?).and_return(true)
-      VCAP::Component.stub(:start_http_server)
-      VCAP::Component.register(:nats => nats)
+      VCAP::Component.varz[:start] = Time.now
 
       VCAP::Stats.stub(
         :process_memory_bytes_and_cpu => [1024, 12],
