@@ -8,7 +8,7 @@ require 'uuidtools'
 module VCAP
 
   WINDOWS = RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
-  A_ROOT_SERVER = '198.41.0.4'
+  A_ROOT_SERVER = '1.2.3.4'
 
   def self.local_ip(route = A_ROOT_SERVER)
     route ||= A_ROOT_SERVER
