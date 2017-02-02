@@ -1,6 +1,10 @@
-cf-vcap-common
+vcap-common
 
-Copyright (c) 2013 Pivotal Software, Inc. All Rights Reserved. 
+Copyright (c) 2015-Present CloudFoundry.org Foundation, Inc. All Rights Reserved.
+
+This project contains software that is Copyright (c) 2013-2015 Pivotal Software, Inc.
+
+Other parts of this project may fall under other copyrights. Please see the LICENSE file for details.
 
 This product is licensed to you under the Apache License, Version 2.0 (the "License").  
 You may not use this product except in compliance with the License.  
